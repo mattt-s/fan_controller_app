@@ -392,6 +392,10 @@ def index():
             'command_close_hex': current_settings.get('command_close_hex'),
             'temp_path': current_settings.get('temp_path'),
             'serial_port': current_settings.get('serial_port'), # Display monitored port
+            # --- ADD THESE TWO LINES ---
+            'check_interval_seconds': current_settings.get('check_interval_seconds', DEFAULT_SETTINGS['check_interval_seconds']),
+            'history_duration_hours': current_settings.get('history_duration_hours', DEFAULT_SETTINGS['history_duration_hours'])
+            # --- END OF ADDED LINES ---
         }
 
     return render_template('index.html', **template_status, **template_settings)

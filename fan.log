@@ -1,82 +1,69 @@
-2025-04-23 16:37:15 [INFO] Starting Flask application.
-2025-04-23 16:37:15 [INFO] Starting fan control background thread.
-2025-04-23 16:37:15 [INFO] Fan control thread started.
-2025-04-23 16:37:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 16:37:15 [WARNING] Initial serial connection failed. Thread will retry.
-2025-04-23 16:37:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 16:37:15 [WARNING] Could not get initial temperature. Assuming fan OFF.
-2025-04-23 16:37:15 [WARNING] Serial port not available. Cannot set fan state.
-2025-04-23 16:37:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 16:37:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 16:37:15 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 16:37:15 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+2025-04-23 19:03:44 [INFO] --- Application Starting ---
+2025-04-23 19:03:44 [INFO] Attempting to load settings from /config/settings.json
+2025-04-23 19:03:44 [WARNING] Config file not found. Using default settings.
+2025-04-23 19:03:44 [INFO] Attempting to save settings to /config/settings.json
+2025-04-23 19:03:44 [ERROR] Failed to save settings to /config/settings.json: [Errno 30] Read-only file system: '/config'
+2025-04-23 19:03:44 [INFO] Starting fan control background thread.
+2025-04-23 19:03:44 [INFO] Starting Flask server on 0.0.0.0:4812
+2025-04-23 19:03:44 [INFO] Fan control thread started.
+2025-04-23 19:03:44 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2025-04-23 19:03:44 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2025-04-23 19:03:44 [WARNING] Initial serial connection failed. Thread will retry.
+2025-04-23 19:03:44 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:03:44 [WARNING] Could not get initial temperature. Assuming fan OFF.
+2025-04-23 19:03:44 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2025-04-23 19:03:44 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2025-04-23 19:03:44 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2025-04-23 19:03:44 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:03:44 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:03:44 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
  * Running on all addresses (0.0.0.0)
  * Running on http://127.0.0.1:4812
  * Running on http://192.168.31.64:4812
-2025-04-23 16:37:15 [INFO] [33mPress CTRL+C to quit[0m
-2025-04-23 16:37:18 [INFO] Stopping fan control background thread.
-2025-04-23 16:37:20 [INFO] Fan control thread stopping.
-2025-04-23 17:03:14 [INFO] Starting Flask application.
-2025-04-23 17:03:14 [INFO] Starting fan control background thread.
-2025-04-23 17:03:15 [INFO] Fan control thread started.
-2025-04-23 17:03:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 17:03:15 [WARNING] Initial serial connection failed. Thread will retry.
-2025-04-23 17:03:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:15 [WARNING] Could not get initial temperature. Assuming fan OFF.
-2025-04-23 17:03:15 [WARNING] Serial port not available. Cannot set fan state.
-2025-04-23 17:03:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 17:03:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:15 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:15 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:4812
- * Running on http://192.168.31.64:4812
-2025-04-23 17:03:15 [INFO] [33mPress CTRL+C to quit[0m
-2025-04-23 17:03:20 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:20 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:25 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:25 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:30 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:30 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:35 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:35 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:40 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:40 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:45 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:45 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:50 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:50 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:55 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path.
-2025-04-23 17:03:55 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 17:03:57 [INFO] Stopping fan control background thread.
-2025-04-23 17:04:00 [INFO] Fan control thread stopping.
-2025-04-23 18:23:48 [INFO] --- Application Starting ---
-2025-04-23 18:23:48 [INFO] Attempting to load settings from /config/settings.json
-2025-04-23 18:23:48 [WARNING] Config file not found. Using default settings.
-2025-04-23 18:23:48 [INFO] Attempting to save settings to /config/settings.json
-2025-04-23 18:23:48 [ERROR] Failed to save settings to /config/settings.json: [Errno 30] Read-only file system: '/config'
-2025-04-23 18:23:48 [INFO] Starting fan control background thread.
-2025-04-23 18:23:48 [INFO] Fan control thread started.
-2025-04-23 18:23:48 [INFO] Starting Flask server on 0.0.0.0:4812
-2025-04-23 18:23:48 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
-2025-04-23 18:23:48 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 18:23:48 [WARNING] Initial serial connection failed. Thread will retry.
-2025-04-23 18:23:48 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
-2025-04-23 18:23:48 [WARNING] Could not get initial temperature. Assuming fan OFF.
-2025-04-23 18:23:48 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
-2025-04-23 18:23:48 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
-2025-04-23 18:23:48 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
-2025-04-23 18:23:48 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
-2025-04-23 18:23:48 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 18:23:48 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on all addresses (0.0.0.0)
- * Running on http://127.0.0.1:4812
- * Running on http://192.168.31.64:4812
-2025-04-23 18:23:48 [INFO] [33mPress CTRL+C to quit[0m
-2025-04-23 18:23:53 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
-2025-04-23 18:23:53 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 18:23:58 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
-2025-04-23 18:23:58 [WARNING] Failed to get temperature reading. Skipping cycle.
-2025-04-23 18:24:02 [INFO] --- Application Stopping ---
-2025-04-23 18:24:02 [INFO] Stopping fan control background thread.
-2025-04-23 18:24:02 [INFO] Fan control thread stopping.
+2025-04-23 19:03:44 [INFO] [33mPress CTRL+C to quit[0m
+2025-04-23 19:03:49 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:03:49 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:03:54 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:03:54 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:03:59 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:03:59 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:04 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:04 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:09 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:09 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:14 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:14 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:19 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:19 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:24 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:24 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:26 [INFO] 127.0.0.1 - - [23/Apr/2025 19:04:26] "GET / HTTP/1.1" 200 -
+2025-04-23 19:04:28 [INFO] 127.0.0.1 - - [23/Apr/2025 19:04:28] "GET /chart_data HTTP/1.1" 200 -
+2025-04-23 19:04:28 [INFO] 127.0.0.1 - - [23/Apr/2025 19:04:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-04-23 19:04:29 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:29 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:34 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:34 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:39 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:39 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:44 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:44 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:49 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:49 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:54 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:54 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:04:59 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:04:59 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:04 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:05:04 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:09 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:05:09 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:14 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:05:14 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:19 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:05:19 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:24 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2025-04-23 19:05:24 [WARNING] Failed to get temperature reading. Skipping cycle.
+2025-04-23 19:05:26 [INFO] --- Application Stopping ---
+2025-04-23 19:05:26 [INFO] Stopping fan control background thread.
+2025-04-23 19:05:26 [INFO] Fan control thread stopping.

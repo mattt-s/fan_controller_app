@@ -119,8 +119,7 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Fan Usage (Last 24 Hours)</h5>
-            <p class="text-center small config-details" id="chart-timeframe">Based on settings: Check Interval {{ current_settings.check_interval_seconds }}s, History {{ current_settings.history_duration_hours }}h</p>
-            <div class="chart-container">
+            <p class="text-center small config-details" id="chart-timeframe">Based on settings: Check Interval {{ check_interval_seconds }}s, History {{ history_duration_hours }}h</p>            <div class="chart-container">
                 <canvas id="fanUsageChart"></canvas>
             </div>
             <p class="text-center small" id="chart-stats"></p>
