@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Control</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 20px; }
+        .status-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .status-on { background-color: limegreen; }
+        .status-off { background-color: red; }
+        .error-banner { margin-top: 15px; }
+        .chart-container { max-width: 400px; margin: 20px auto; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="mb-4">Fan Control Status</h1>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Current Status</h5>
+            <p><strong>Temperature:</strong> <span id="current-temp">{{ current_temp }}</span> °C</p>
+            <p><strong>Fan State:</strong>
+                <span id="fan-state-text">{{ fan_state }}</span>
+                <span id="fan-state-indicator" class="status-indicator {{ 'status-on' if fan_state == 'ON' else 'status-off' }}"></span>
+            </p>
+            <p><small>Monitoring Temp Path: {{ temp_path }}</small></p>
+            <p><small>Using Serial Port: {{ serial_port }}</small></p>
+            {% if last_error %}
+            <div class="alert alert-danger error-banner" role="alert">
+                <strong>Error:</strong> {{ last_error }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Update Settings</h5>
+            <form action="{{ url_for('update_settings') }}" method="post">
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="threshold_ceiling" class="col-form-label">Turn Fan ON above (°C):</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" step="0.1" id="threshold_ceiling" name="threshold_ceiling" class="form-control" value="{{ threshold_ceiling }}">
+                    </div>
+                </div>
+                <div class="row g-3 align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="threshold_floor" class="col-form-label">Turn Fan OFF below (°C):</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="number" step="0.1" id="threshold_floor" name="threshold_floor" class="form-control" value="{{ threshold_floor }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Thresholds</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Fan Usage (Last 24 Hours)</h5>
+            <div class="chart-container">
+                <canvas id="fanUsageChart"></canvas>
+            </div>
+            <p class="text-center small" id="chart-stats"></p>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+<script>
+    let fanChart; // Variable to hold the chart instance
+
+    function updateChart(data) {
+        const ctx = document.getElementById('fanUsageChart').getContext('2d');
+        const chartData = {
+            labels: ['On Time (%)', 'Off Time (%)'],
+            datasets: [{
+                label: 'Fan Usage Ratio',
+                data: [data.on_percentage, data.off_percentage],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)', // Greenish for ON
+                    'rgba(255, 99, 132, 0.6)'  // Reddish for OFF
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        if (fanChart) {
+            // Update existing chart
+            fanChart.data.datasets[0].data = [data.on_percentage, data.off_percentage];
+            fanChart.update();
+        } else {
+            // Create new chart
+            fanChart = new Chart(ctx, {
+                type: 'pie', // Pie chart for ratio
+                data: chartData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+         // Update stats text
+         const onHours = Math.floor(data.total_on_seconds / 3600);
+         const onMinutes = Math.floor((data.total_on_seconds % 3600) / 60);
+         const offHours = Math.floor(data.total_off_seconds / 3600);
+         const offMinutes = Math.floor((data.total_off_seconds % 3600) / 60);
+         document.getElementById('chart-stats').innerText =
+            `Total On: ${onHours}h ${onMinutes}m | Total Off: ${offHours}h ${offMinutes}m (in last 24h)`;
+    }
+
+    // Fetch chart data on page load
+    fetch('/chart_data')
+        .then(response => response.json())
+        .then(data => {
+            updateChart(data);
+        })
+        .catch(error => console.error('Error fetching chart data:', error));
+
+    // Optional: Auto-refresh status (every 10 seconds)
+    /*
+    setInterval(() => {
+         // Fetch status data
+         fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('current-temp').innerText = data.current_temp !== null ? data.current_temp.toFixed(1) : "N/A";
+                const fanStateText = data.fan_state ? "ON" : "OFF";
+                const fanStateClass = data.fan_state ? "status-on" : "status-off";
+                document.getElementById('fan-state-text').innerText = fanStateText;
+                const indicator = document.getElementById('fan-state-indicator');
+                indicator.className = `status-indicator ${fanStateClass}`;
+                // Maybe update error display too
+            })
+            .catch(error => console.error('Error fetching status:', error));
+
+         // Fetch and update chart data periodically too
+         fetch('/chart_data')
+            .then(response => response.json())
+            .then(data => {
+                updateChart(data);
+            })
+            .catch(error => console.error('Error fetching chart data:', error));
+    }, 10000); // Refresh every 10000 ms (10 seconds)
+    */
+
+</script>
+</body>
+</html>
