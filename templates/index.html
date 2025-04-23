@@ -19,22 +19,43 @@
         .status-off { background-color: red; }
         .error-banner { margin-top: 15px; }
         .chart-container { max-width: 400px; margin: 20px auto; }
+        .form-label { font-weight: 500;} /* Make labels slightly bolder */
+        .config-details { font-size: 0.9em; color: #555; } /* Style for displaying config */
+        .card-body .row { margin-bottom: 0.8rem; } /* Consistent spacing */
     </style>
 </head>
 <body>
 <div class="container">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     <h1 class="mb-4">Fan Control Status</h1>
 
     <div class="card mb-4">
         <div class="card-body">
             <h5 class="card-title">Current Status</h5>
-            <p><strong>Temperature:</strong> <span id="current-temp">{{ current_temp }}</span> °C</p>
-            <p><strong>Fan State:</strong>
-                <span id="fan-state-text">{{ fan_state }}</span>
-                <span id="fan-state-indicator" class="status-indicator {{ 'status-on' if fan_state == 'ON' else 'status-off' }}"></span>
-            </p>
-            <p><small>Monitoring Temp Path: {{ temp_path }}</small></p>
-            <p><small>Using Serial Port: {{ serial_port }}</small></p>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Temperature:</strong> <span id="current-temp">{{ current_temp }}</span> °C</p>
+                    <p class="config-details">Monitoring Path: {{ temp_path }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Fan State:</strong>
+                        <span id="fan-state-text">{{ fan_state }}</span>
+                        <span id="fan-state-indicator" class="status-indicator {{ 'status-on' if fan_state == 'ON' else 'status-off' }}"></span>
+                    </p>
+                    <p class="config-details">Using Serial Port: {{ serial_port }}</p>
+                </div>
+            </div>
             {% if last_error %}
             <div class="alert alert-danger error-banner" role="alert">
                 <strong>Error:</strong> {{ last_error }}
@@ -47,23 +68,50 @@
         <div class="card-body">
             <h5 class="card-title">Update Settings</h5>
             <form action="{{ url_for('update_settings') }}" method="post">
-                <div class="row g-3 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label for="threshold_ceiling" class="col-form-label">Turn Fan ON above (°C):</label>
+                <h6>Temperature Thresholds</h6>
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="threshold_ceiling" class="col-form-label form-label">Turn Fan ON above (°C):</label>
                     </div>
-                    <div class="col-auto">
+                    <div class="col-md-3">
                         <input type="number" step="0.1" id="threshold_ceiling" name="threshold_ceiling" class="form-control" value="{{ threshold_ceiling }}">
                     </div>
-                </div>
-                <div class="row g-3 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label for="threshold_floor" class="col-form-label">Turn Fan OFF below (°C):</label>
+                    <div class="col-md-3">
+                        <label for="threshold_floor" class="col-form-label form-label">Turn Fan OFF below (°C):</label>
                     </div>
-                    <div class="col-auto">
+                    <div class="col-md-3">
                         <input type="number" step="0.1" id="threshold_floor" name="threshold_floor" class="form-control" value="{{ threshold_floor }}">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Thresholds</button>
+
+                <h6 class="mt-3">Serial Commands (Hex)</h6>
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="command_open_hex" class="col-form-label form-label">Fan ON Command:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" id="command_open_hex" name="command_open_hex" class="form-control" value="{{ command_open_hex }}" pattern="[0-9a-fA-F]+" title="Enter Hexadecimal characters only (0-9, a-f, A-F)">
+                    </div>
+                </div>
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="command_close_hex" class="col-form-label form-label">Fan OFF Command:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" id="command_close_hex" name="command_close_hex" class="form-control" value="{{ command_close_hex }}" pattern="[0-9a-fA-F]+" title="Enter Hexadecimal characters only (0-9, a-f, A-F)">
+                    </div>
+                </div>
+
+                <h6 class="mt-3">Temperature Source</h6>
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <label for="temp_path" class="col-form-label form-label">Temperature File Path:</label>
+                    </div>
+                    <div class="col-md-9">
+                        <input type="text" id="temp_path" name="temp_path" class="form-control" value="{{ temp_path }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">Update & Save Settings</button>
             </form>
         </div>
     </div>
@@ -71,6 +119,7 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Fan Usage (Last 24 Hours)</h5>
+            <p class="text-center small config-details" id="chart-timeframe">Based on settings: Check Interval {{ current_settings.check_interval_seconds }}s, History {{ current_settings.history_duration_hours }}h</p>
             <div class="chart-container">
                 <canvas id="fanUsageChart"></canvas>
             </div>
@@ -143,7 +192,7 @@
          const offHours = Math.floor(data.total_off_seconds / 3600);
          const offMinutes = Math.floor((data.total_off_seconds % 3600) / 60);
          document.getElementById('chart-stats').innerText =
-            `Total On: ${onHours}h ${onMinutes}m | Total Off: ${offHours}h ${offMinutes}m (in last 24h)`;
+            `Total On: ${onHours}h ${onMinutes}m | Total Off: ${offHours}h ${offMinutes}m`;
     }
 
     // Fetch chart data on page load
@@ -155,6 +204,7 @@
         .catch(error => console.error('Error fetching chart data:', error));
 
     // Optional: Auto-refresh status (every 10 seconds)
+    // Consider if this is needed or if page reload after settings change is enough
     /*
     setInterval(() => {
          // Fetch status data
@@ -167,7 +217,7 @@
                 document.getElementById('fan-state-text').innerText = fanStateText;
                 const indicator = document.getElementById('fan-state-indicator');
                 indicator.className = `status-indicator ${fanStateClass}`;
-                // Maybe update error display too
+                // Update error display if needed
             })
             .catch(error => console.error('Error fetching status:', error));
 
