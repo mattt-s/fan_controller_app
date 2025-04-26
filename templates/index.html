@@ -18,14 +18,8 @@
         .status-on { background-color: limegreen; }
         .status-off { background-color: red; }
         .error-banner { margin-top: 15px; }
-        /* Modified chart container to allow potentially different heights if needed */
-        .chart-container {
-            max-width: 600px; /* Increased max-width for better history chart display */
-            margin: 20px auto;
-            position: relative; /* Needed for tooltip positioning */
-            height: 50px; /* Give the history chart a fixed height */
-        }
-         /* Specific style for the pie chart container */
+        /* Original chart-container style is removed as it was likely for the history chart.
+           Keeping pie-chart-container */
         .pie-chart-container {
              max-width: 400px;
              margin: 20px auto;
@@ -34,10 +28,7 @@
         .form-label { font-weight: 500;} /* Make labels slightly bolder */
         .config-details { font-size: 0.9em; color: #555; } /* Style for displaying config */
         .card-body .row { margin-bottom: 0.8rem; } /* Consistent spacing */
-        .history-chart-wrapper {
-            margin: 20px auto;
-            max-width: 600px; /* Match chart-container max-width */
-        }
+
          /* Remove chart-title style, use card-title */
 
         .card-body .card-title { /* Style for card titles within card-body */
@@ -169,15 +160,14 @@
             </div>
             <p class="text-center small" id="chart-stats"></p>
 
-
-            {# --- START: New section for History Timeline Chart --- #}
-            <h5 class="card-title mt-4" id="history-chart-title">Fan State Timeline (Loading...)</h5> {# Dynamic title #}
-            <div class="history-chart-wrapper">
-                <div class="chart-container" style="height: 50px;">
-                    <canvas id="fanHistoryChart"></canvas>
-                </div>
-            </div>
-            {# --- END: New section for History Timeline Chart --- #}
+            {# --- START: Removed section for History Timeline Chart --- #}
+            {# <h5 class="card-title mt-4" id="history-chart-title">Fan State Timeline (Loading...)</h5> #}
+            {# <div class="history-chart-wrapper"> #}
+            {#     <div class="chart-container" style="height: 50px;"> #}
+                {#         <canvas id="fanHistoryChart"></canvas> #}
+                {#     </div> #}
+            {# </div> #}
+            {# --- END: Removed section for History Timeline Chart --- #}
 
         </div>
     </div>
@@ -188,7 +178,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
 <script>
     let fanChart; // Variable to hold the pie chart instance
-    let historyChart; // Variable to hold the history bar chart instance
+    // let historyChart; // Removed
 
     function formatDuration(seconds) {
         if (seconds === null || seconds === undefined || seconds < 0) return "N/A";
@@ -210,7 +200,7 @@
     function updateChartTitles(totalSeconds) {
          const durationString = formatDuration(totalSeconds);
          document.getElementById('pie-chart-title').innerText = `Fan Usage Summary (Last ${durationString})`;
-         document.getElementById('history-chart-title').innerText = `Fan State Timeline (Last ${durationString})`;
+         // document.getElementById('history-chart-title').innerText = `Fan State Timeline (Last ${durationString})`; // Removed
     }
 
     function updatePieChart(data) {
@@ -275,109 +265,7 @@
             `Total On: ${onDurationString} | Total Off: ${offDurationString}`;
     }
 
-    function updateHistoryChart(segments) {
-        const ctx = document.getElementById('fanHistoryChart').getContext('2d');
-
-        // Prepare data for the stacked horizontal bar chart
-        // Each data point in the dataset is the duration of a segment
-        const durations = segments.map(s => s.duration_seconds);
-        const backgroundColors = segments.map(s => s.state === 'ON' ? 'rgba(75, 192, 192, 0.8)' : 'rgba(255, 99, 132, 0.8)');
-         const borderColors = segments.map(s => s.state === 'ON' ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)');
-
-
-        const historyChartData = {
-            labels: ['Timeline'], // Single label for the Y axis
-            datasets: [{
-                label: 'Fan State Timeline',
-                 // No individual label per segment needed in the legend
-                data: durations,
-                backgroundColor: backgroundColors,
-                borderColor: borderColors,
-                borderWidth: 1,
-                stack: 'historyStack', // Group all segments into one bar visually
-                 hoverBackgroundColor: backgroundColors.map(color => color.replace('0.8', '1.0')), // Brighter on hover
-                 hoverBorderColor: borderColors.map(color => color.replace('1)', '1)')) // Keep border solid on hover
-            }]
-        };
-
-        const historyChartOptions = {
-            indexAxis: 'y', // Make it a horizontal bar chart
-            scales: {
-                x: {
-                    stacked: true, // Stack segments horizontally
-                    title: {
-                        display: true,
-                        text: 'Time' // Or "Time (seconds/minutes/hours)"
-                    },
-                    beginAtZero: true, // Start x-axis from zero
-                    ticks: {
-                         callback: function(value, index, ticks) {
-                             // Format x-axis ticks (optional, can be left as seconds)
-                             // Example: convert seconds to H:M:S or just show seconds
-                             // Find max duration to decide formatting (h, m, s)
-                              const totalSeconds = durations.reduce((sum, d) => sum + d, 0);
-                              if (totalSeconds >= 3600 * 2) return (value / 3600).toFixed(0) + 'h'; // Show hours if total is > 2h
-                              if (totalSeconds >= 60 * 2) return (value / 60).toFixed(0) + 'm'; // Show minutes if total is > 2m
-                             return value + 's'; // Otherwise show seconds
-                         }
-                    }
-                },
-                y: {
-                    stacked: true, // Stack is applied per y-category (only one here)
-                    beginAtZero: true,
-                    display: false // Hide the 'Timeline' label on the y-axis
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false // Hide the dataset legend (we use colors directly)
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            // Find the corresponding segment data
-                            const segmentIndex = context.dataIndex;
-                            const segment = segments[segmentIndex]; // Get the original segment data
-
-                            const duration = segment.duration_seconds;
-                            const state = segment.state;
-
-                            // Format duration nicely
-                           const durationString = formatDuration(duration);
-
-                            return `${state}: ${durationString}`;
-                        },
-                         title: function(context) {
-                             return ''; // No title
-                         }
-                    }
-                }
-            },
-             hover: {
-                  mode: 'nearest',
-                  intersect: true
-             },
-            responsive: true,
-            maintainAspectRatio: false // Important for controlling height with CSS
-        };
-
-
-        if (historyChart) {
-            // Update existing chart data and options
-            historyChart.data.datasets[0].data = durations;
-            historyChart.data.datasets[0].backgroundColor = backgroundColors;
-            historyChart.data.datasets[0].borderColor = borderColors;
-             historyChart.options.plugins.tooltip.callbacks.label = historyChartOptions.plugins.tooltip.callbacks.label; // Ensure tooltip callback is updated
-            historyChart.update();
-        } else {
-            // Create new chart
-            historyChart = new Chart(ctx, {
-                type: 'bar', // Use 'bar' type
-                data: historyChartData,
-                options: historyChartOptions
-            });
-        }
-    }
+    // function updateHistoryChart(segments) { ... } // Removed
 
 
     // Fetch chart data on page load
@@ -387,7 +275,7 @@
             // Update chart titles with the actual duration displayed
              updateChartTitles(data.total_charted_seconds);
             updatePieChart(data); // Update pie chart
-            updateHistoryChart(data.history_segments); // Update history bar chart
+            // updateHistoryChart(data.history_segments); // Removed
         })
         .catch(error => {
              console.error('Error fetching chart data:', error);
@@ -400,9 +288,10 @@
     /*
     setInterval(() => {
          // Fetch status data
-         fetch('/status')
+         fetch('/status') // Note: You don't currently have a /status endpoint, update this if needed.
             .then(response => response.json())
             .then(data => {
+                // Assuming a /status endpoint returns {'current_temp': ..., 'fan_state': ..., 'last_error': ...}
                 document.getElementById('current-temp').innerText = data.current_temp !== null ? data.current_temp.toFixed(1) : "N/A";
                 const fanStateText = data.fan_state ? "ON" : "OFF";
                 const fanStateClass = data.fan_state ? "status-on" : "status-off";
@@ -410,6 +299,27 @@
                 const indicator = document.getElementById('fan-state-indicator');
                 indicator.className = `status-indicator ${fanStateClass}`;
                 // Update error display if needed - requires more logic
+                // if (data.last_error) { // Basic error display logic
+                //     const errorDiv = document.querySelector('.error-banner');
+                //     if (!errorDiv) {
+                //         // Add error div if it doesn't exist
+                //         const statusCardBody = document.querySelector('.card-body'); // Adjust selector if needed
+                //         const newErrorDiv = document.createElement('div');
+                //         newErrorDiv.className = 'alert alert-danger error-banner';
+                //         newErrorDiv.setAttribute('role', 'alert');
+                //         newErrorDiv.innerHTML = `<strong>Error:</strong> ${data.last_error}`;
+                //         statusCardBody.appendChild(newErrorDiv);
+                //     } else {
+                //         errorDiv.innerHTML = `<strong>Error:</strong> ${data.last_error}`;
+                //         errorDiv.style.display = ''; // Make sure it's visible
+                //     }
+                // } else {
+                //      // Hide error div if no error
+                //     const errorDiv = document.querySelector('.error-banner');
+                //     if (errorDiv) {
+                //         errorDiv.style.display = 'none';
+                //     }
+                // }
             })
             .catch(error => console.error('Error fetching status:', error));
 
@@ -419,7 +329,7 @@
             .then(data => {
                 updateChartTitles(data.total_charted_seconds);
                 updatePieChart(data);
-                updateHistoryChart(data.history_segments);
+                // updateHistoryChart(data.history_segments); // Removed
             })
             .catch(error => console.error('Error fetching chart data:', error));
     }, 10000); // Refresh every 10000 ms (10 seconds)

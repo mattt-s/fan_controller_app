@@ -607,6 +607,9 @@ def chart_data():
         # Create a copy of the history that is within the max duration window *plus a small buffer*
         # This ensures we have the event just before max_cutoff_time if it exists
         history_copy_raw = list(fan_history) # Get the raw history deque content
+        # The history_copy is used only for state calculation in the window, not for segments anymore.
+        # We still need events that might be slightly before the window start to determine the state *at* the window start.
+        # Let's keep the filtering for state calculation.
         history_copy = [item for item in history_copy_raw if item[0] >= max_cutoff_time - timedelta(seconds=current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))] # Filter within window + buffer
 
         current_fan_state_for_calc = fan_state # Get current state under lock
@@ -644,7 +647,7 @@ def chart_data():
             'off_percentage': 100 if not current_fan_state_for_calc else 0,
             'total_on_seconds': 0,
             'total_off_seconds': 0,
-            'history_segments': [],
+            # 'history_segments': [], # Removed
             'total_charted_seconds': 0 # Report 0 total seconds
         }
         return jsonify(chart_data)
@@ -691,48 +694,14 @@ def chart_data():
 
 
     # --- Generate History Timeline Segments for Bar Chart ---
-    segments = []
-    current_segment_start_time = chart_window_start_time
-    # The state at the start of the first segment is the state active at chart_window_start_time
-    current_segment_state = state_at_chart_window_start
-
-
-    # Iterate through history events that are *after* the window start
-    for ts, state in history_copy:
-        if ts > chart_window_start_time:
-            # This event marks the end of the current segment and start of the next
-            segment_end_time = ts
-            duration = segment_end_time - current_segment_start_time
-
-            # Add the completed segment if it has a positive duration
-            if duration > timedelta(0):
-                segments.append({
-                    'state': 'ON' if current_segment_state else 'OFF',
-                    'duration_seconds': duration.total_seconds()
-                })
-
-            # Start a new segment
-            current_segment_start_time = segment_end_time
-            current_segment_state = state
-
-    # Add the final segment from the last event time within the window (or window start) to 'now'
-    duration_last_segment = now - current_segment_start_time
-    if duration_last_segment > timedelta(0):
-        # The state of the final segment is the current state of the fan
-        segments.append({
-            'state': 'ON' if current_fan_state_for_calc else 'OFF',
-            'duration_seconds': duration_last_segment.total_seconds()
-        })
-
-    # Ensure segments are ordered by time (they should be based on history processing, but confirm)
-    # The generated segments are already in chronological order.
+    # SEGMENT GENERATION LOGIC REMOVED
 
     chart_data = {
         'on_percentage': round(on_percentage, 1),
         'off_percentage': round(off_percentage, 1),
         'total_on_seconds': round(total_on_time.total_seconds()),
         'total_off_seconds': round(total_off_time.total_seconds()),
-        'history_segments': segments, # Add the new data for the bar chart
+        # 'history_segments': segments, # Removed
         'total_charted_seconds': round(total_charted_seconds) # Add actual duration in seconds
     }
     return jsonify(chart_data)
