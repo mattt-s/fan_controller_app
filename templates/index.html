@@ -38,12 +38,18 @@
             margin: 20px auto;
             max-width: 600px; /* Match chart-container max-width */
         }
-        .chart-title {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 1.25rem; /* Similar size to card titles */
-            font-weight: 500;
+         /* Remove chart-title style, use card-title */
+
+        .card-body .card-title { /* Style for card titles within card-body */
+            margin-bottom: 0.8rem; /* Ensure consistent spacing after titles */
         }
+         /* Adjust spacing for the small text below chart titles */
+        .card-body .small.config-details,
+        .card-body .small {
+            margin-top: -0.5rem; /* Pull up slightly to reduce gap */
+            margin-bottom: 1rem; /* Add space below the small text */
+        }
+
     </style>
 </head>
 <body>
@@ -142,7 +148,7 @@
                         <input type="number" id="check_interval_seconds" name="check_interval_seconds" class="form-control" value="{{ check_interval_seconds }}">
                     </div>
                     <div class="col-md-3">
-                        <label for="history_duration_hours" class="col-form-label form-label">History Duration (h):</label>
+                        <label for="history_duration_hours" class="col-form-label form-label">Max History (h):</label> {# Updated text #}
                     </div>
                     <div class="col-md-3">
                         <input type="number" id="history_duration_hours" name="history_duration_hours" class="form-control" value="{{ history_duration_hours }}">
@@ -156,18 +162,18 @@
 
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Fan Usage Summary (Last {{ history_duration_hours }} Hours)</h5>
-            <p class="text-center small config-details">Based on check interval: {{ check_interval_seconds }}s</p>
-            <div class="pie-chart-container"> {# Specific container for the pie chart #}
+            <h5 class="card-title" id="pie-chart-title">Fan Usage Summary (Loading...)</h5> {# Dynamic title #}
+            <p class="text-center small config-details">Configured max history: {{ history_duration_hours }}h, Check interval: {{ check_interval_seconds }}s</p> {# Keep config info #}
+            <div class="pie-chart-container">
                 <canvas id="fanUsageChart"></canvas>
             </div>
             <p class="text-center small" id="chart-stats"></p>
 
 
             {# --- START: New section for History Timeline Chart --- #}
-            <h5 class="card-title mt-4">Fan State Timeline (Last {{ history_duration_hours }} Hours)</h5>
-            <div class="history-chart-wrapper"> {# Wrapper for history chart #}
-                <div class="chart-container" style="height: 50px;"> {# Fixed height for the bar #}
+            <h5 class="card-title mt-4" id="history-chart-title">Fan State Timeline (Loading...)</h5> {# Dynamic title #}
+            <div class="history-chart-wrapper">
+                <div class="chart-container" style="height: 50px;">
                     <canvas id="fanHistoryChart"></canvas>
                 </div>
             </div>
@@ -183,6 +189,29 @@
 <script>
     let fanChart; // Variable to hold the pie chart instance
     let historyChart; // Variable to hold the history bar chart instance
+
+    function formatDuration(seconds) {
+        if (seconds === null || seconds === undefined || seconds < 0) return "N/A";
+        if (seconds === 0) return "0s";
+
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        let durationString = '';
+        if (hours > 0) durationString += `${hours}h `;
+        if (minutes > 0 || hours > 0) durationString += `${minutes}m `;
+        if (remainingSeconds > 0 || durationString === '') durationString += `${remainingSeconds}s`; // Always show seconds if nothing else, or if seconds > 0
+
+        return durationString.trim();
+    }
+
+
+    function updateChartTitles(totalSeconds) {
+         const durationString = formatDuration(totalSeconds);
+         document.getElementById('pie-chart-title').innerText = `Fan Usage Summary (Last ${durationString})`;
+         document.getElementById('history-chart-title').innerText = `Fan State Timeline (Last ${durationString})`;
+    }
 
     function updatePieChart(data) {
         const ctx = document.getElementById('fanUsageChart').getContext('2d');
@@ -238,27 +267,12 @@
                 }
             });
         }
-         // Update stats text
-         const onHours = Math.floor(data.total_on_seconds / 3600);
-         const onMinutes = Math.floor((data.total_on_seconds % 3600) / 60);
-         const onSeconds = Math.floor(data.total_on_seconds % 60); // Include seconds
-         const offHours = Math.floor(data.total_off_seconds / 3600);
-         const offMinutes = Math.floor((data.total_off_seconds % 3600) / 60);
-          const offSeconds = Math.floor(data.total_off_seconds % 60); // Include seconds
-
-         // More detailed time display
-         let onTimeStr = '';
-         if (onHours > 0) onTimeStr += `${onHours}h `;
-         if (onMinutes > 0 || onHours > 0) onTimeStr += `${onMinutes}m `;
-         onTimeStr += `${onSeconds}s`;
-
-         let offTimeStr = '';
-         if (offHours > 0) offTimeStr += `${offHours}h `;
-         if (offMinutes > 0 || offHours > 0) offTimeStr += `${offMinutes}m `;
-         offTimeStr += `${offSeconds}s`;
+         // Update stats text using the total seconds provided
+         const onDurationString = formatDuration(data.total_on_seconds);
+         const offDurationString = formatDuration(data.total_off_seconds);
 
          document.getElementById('chart-stats').innerText =
-            `Total On: ${onTimeStr} | Total Off: ${offTimeStr}`;
+            `Total On: ${onDurationString} | Total Off: ${offDurationString}`;
     }
 
     function updateHistoryChart(segments) {
@@ -300,9 +314,11 @@
                          callback: function(value, index, ticks) {
                              // Format x-axis ticks (optional, can be left as seconds)
                              // Example: convert seconds to H:M:S or just show seconds
-                             if (value >= 3600) return (value / 3600).toFixed(1) + 'h';
-                             if (value >= 60) return (value / 60).toFixed(0) + 'm';
-                             return value + 's';
+                             // Find max duration to decide formatting (h, m, s)
+                              const totalSeconds = durations.reduce((sum, d) => sum + d, 0);
+                              if (totalSeconds >= 3600 * 2) return (value / 3600).toFixed(0) + 'h'; // Show hours if total is > 2h
+                              if (totalSeconds >= 60 * 2) return (value / 60).toFixed(0) + 'm'; // Show minutes if total is > 2m
+                             return value + 's'; // Otherwise show seconds
                          }
                     }
                 },
@@ -327,21 +343,11 @@
                             const state = segment.state;
 
                             // Format duration nicely
-                            const hours = Math.floor(duration / 3600);
-                            const minutes = Math.floor((duration % 3600) / 60);
-                            const seconds = Math.floor(duration % 60);
-
-                            let durationString = '';
-                            if (hours > 0) durationString += `${hours}h `;
-                            if (minutes > 0 || hours > 0) durationString += `${minutes}m `; // Show minutes if > 0 or hours > 0
-                            durationString += `${seconds}s`;
+                           const durationString = formatDuration(duration);
 
                             return `${state}: ${durationString}`;
                         },
                          title: function(context) {
-                             // Optional: Add start/end time to tooltip title
-                             // This requires sending start/end times from Python
-                             // For simplicity, leaving title empty or basic
                              return ''; // No title
                          }
                     }
@@ -378,13 +384,19 @@
     fetch('/chart_data')
         .then(response => response.json())
         .then(data => {
+            // Update chart titles with the actual duration displayed
+             updateChartTitles(data.total_charted_seconds);
             updatePieChart(data); // Update pie chart
             updateHistoryChart(data.history_segments); // Update history bar chart
         })
-        .catch(error => console.error('Error fetching chart data:', error));
+        .catch(error => {
+             console.error('Error fetching chart data:', error);
+             // Optionally update titles/stats to show error
+             updateChartTitles(0); // Show 0 duration on error
+             document.getElementById('chart-stats').innerText = 'Failed to load chart data.';
+        });
 
     // Optional: Auto-refresh status and chart (every 10 seconds)
-    // You can uncomment this block if you want the page to update automatically
     /*
     setInterval(() => {
          // Fetch status data
@@ -405,6 +417,7 @@
          fetch('/chart_data')
             .then(response => response.json())
             .then(data => {
+                updateChartTitles(data.total_charted_seconds);
                 updatePieChart(data);
                 updateHistoryChart(data.history_segments);
             })

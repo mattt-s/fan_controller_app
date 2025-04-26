@@ -19,7 +19,7 @@ DEFAULT_SETTINGS = {
     "command_close_hex": "A00100A1",
     "temp_path": "/sys/class/hwmon/hwmon0/temp1_input",
     "check_interval_seconds": 5,
-    "history_duration_hours": 24 # Default history duration
+    "history_duration_hours": 24 # Default maximum history duration
 }
 # --- Persistent Configuration File Path (inside container) ---
 CONFIG_DIR = "/config"
@@ -76,7 +76,16 @@ def load_settings():
             # Update defaults with loaded values, ensuring only expected keys are updated or handled
             # Use .get() with default to handle missing keys gracefully
             for key in DEFAULT_SETTINGS:
-                settings_temp[key] = loaded_settings.get(key, DEFAULT_SETTINGS[key])
+                # Explicitly handle potential type issues from JSON (e.g., numbers as strings)
+                if key in ['threshold_ceiling', 'threshold_floor']:
+                    try: settings_temp[key] = float(loaded_settings.get(key, DEFAULT_SETTINGS[key]))
+                    except (ValueError, TypeError): write_log('warning', f"Invalid value for setting '{key}': {loaded_settings.get(key)}. Using default {DEFAULT_SETTINGS[key]}."); settings_temp[key] = DEFAULT_SETTINGS[key]
+                elif key in ['check_interval_seconds', 'history_duration_hours']:
+                    try: settings_temp[key] = int(loaded_settings.get(key, DEFAULT_SETTINGS[key]))
+                    except (ValueError, TypeError): write_log('warning', f"Invalid value for setting '{key}': {loaded_settings.get(key)}. Using default {DEFAULT_SETTINGS[key]}."); settings_temp[key] = DEFAULT_SETTINGS[key]
+                else: # For strings like paths, commands, port
+                    settings_temp[key] = loaded_settings.get(key, DEFAULT_SETTINGS[key])
+
 
             write_log('info', "Successfully loaded settings from file.")
             loaded_successfully = True
@@ -93,8 +102,16 @@ def load_settings():
     with settings_lock: # Lock before assigning to global
         current_settings = settings_temp
         # Derive dependent variables - ensure types are correct
-        history_duration = timedelta(hours=int(current_settings.get("history_duration_hours", DEFAULT_SETTINGS["history_duration_hours"])))
-        check_interval = int(current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))
+        # Ensure values are positive where required
+        history_duration_hours_val = max(1, int(current_settings.get("history_duration_hours", DEFAULT_SETTINGS["history_duration_hours"]))) # Ensure at least 1 hour
+        check_interval_seconds_val = max(1, int(current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))) # Ensure at least 1 second
+
+        history_duration = timedelta(hours=history_duration_hours_val)
+        check_interval = check_interval_seconds_val
+
+        current_settings["history_duration_hours"] = history_duration_hours_val # Update settings dict with valid values
+        current_settings["check_interval_seconds"] = check_interval_seconds_val
+
         # Derive byte commands safely
         derive_byte_commands(update_global=True) # Update globals command_open/close_bytes
 
@@ -303,6 +320,20 @@ def get_ssd_temp(sysfs_path):
                 last_error = error_msg
         return None
 
+# Helper to find the state active at a specific timestamp based on history
+def _get_state_at_time(timestamp, history_list, default_state):
+    """
+    Finds the fan state that was active at the given timestamp based on the history list.
+    Assumes history_list is sorted chronologically.
+    Returns default_state if history is empty or all events are after the timestamp.
+    """
+    state_at_time = default_state
+    for ts, state in reversed(history_list):
+        if ts <= timestamp:
+            state_at_time = state
+            break
+    return state_at_time
+
 # --- Fan Control Logic (Background Thread) ---
 def fan_control_loop():
     """The main loop to check temperature and control the fan using current settings."""
@@ -336,8 +367,8 @@ def fan_control_loop():
     now = datetime.now()
     with state_lock: # Lock for shared state fan_state, fan_history
         # Ensure history starts with the determined initial state at the very beginning
-        fan_history.append((now - local_history_duration - timedelta(seconds=1), initial_state)) # Add a state entry just before the history window
-        fan_history.append((now, initial_state)) # Add the actual state at startup time
+        # We add an entry at `now`, the pruning logic below will handle keeping it within the window
+        fan_history.append((now, initial_state))
         fan_state = initial_state
     set_fan(initial_state) # Attempt to set the physical fan state
 
@@ -351,6 +382,20 @@ def fan_control_loop():
             local_check_interval = current_settings.get("check_interval_seconds", DEFAULT_SETTINGS['check_interval_seconds'])
             local_history_duration = timedelta(hours=int(current_settings.get("history_duration_hours", DEFAULT_SETTINGS["history_duration_hours"])))
 
+        # --- History Pruning ---
+        # Always prune history based on the *maximum* configured duration
+        cutoff_time = now - local_history_duration
+        with state_lock: # Lock for history access
+            while fan_history and fan_history[0][0] < cutoff_time:
+                fan_history.popleft()
+            # After pruning, ensure the earliest entry represents the state at or after cutoff_time
+            # If history is now empty, the current state effectively covers the window.
+            # If the earliest entry is > cutoff_time, the state from cutoff_time up to that point is implicitly the state of that first entry or current state if empty.
+            # We might need to add a synthetic entry at `cutoff_time` if history doesn't start there?
+            # Let's revisit this. The chart data logic is better equipped to handle the window start.
+            # For the thread loop itself, just pruning is sufficient to keep deque size bounded.
+            pass # Pruning logic moved below temp read
+
 
         temp = get_ssd_temp(sysfs_path=local_temp_path)
 
@@ -358,19 +403,15 @@ def fan_control_loop():
         with state_lock:
             # Keep last known valid temp if current read fails, but update if successful
             current_temp = temp if temp is not None else current_temp
-            # Prune history using duration from settings BEFORE potential append
-            cutoff = now - local_history_duration
-            while fan_history and fan_history[0][0] < cutoff:
+            # Prune history based on the *maximum* duration AFTER getting current time
+            cutoff_time = now - local_history_duration
+            while fan_history and fan_history[0][0] < cutoff_time:
                 fan_history.popleft()
 
 
         if temp is None:
             write_log('warning', "Failed to get temperature reading. Skipping state check this cycle.")
-            # Still need to wait and prune history based on 'now' and settings
-            with state_lock:
-                # Ensure history has at least the current state if it's empty after pruning
-                if not fan_history:
-                    fan_history.append((now, fan_state)) # Add current state at current time
+            # Still need to wait using the interval from settings
             stop_thread.wait(local_check_interval)
             continue # Skip state change logic if temp read failed
 
@@ -393,21 +434,21 @@ def fan_control_loop():
             if set_fan(new_state): # If command sent successfully
                 with state_lock: # Update shared state under lock
                     fan_state = new_state
-                    fan_history.append((now, new_state)) # Record the state change event
-                    # Pruning is now done at the beginning of the loop
+                    # Add the state change event to history
+                    fan_history.append((now, new_state))
+                    # Pruning happens at the start of the loop based on max duration
             else:
                 write_log('error', "Failed to change fan state. State remains {}. Retrying next cycle.".format("ON" if current_fan_state else "OFF"))
                 # Don't update fan_state or history if set_fan failed
         else:
-            # If state is unchanged, still ensure history reflects the current state point in time
+            # If state is unchanged, add a history entry periodically to ensure graph
+            # covers the full duration up to 'now' accurately, even with no changes.
+            # Only add if the last history entry is significantly older than the interval.
             with state_lock:
-                # This helps ensure the last segment in the chart data calculation goes up to 'now'
-                # without needing complex logic to find the last state if no changes occurred recently.
-                # We can append the current state periodically even if it hasn't changed,
-                # or rely on the chart data logic to handle the final segment.
-                # Appending every cycle might make the deque very large if interval is small.
-                # Let's rely on the chart data logic for the final segment.
-                pass # History pruning is handled at the start of the loop
+                if not fan_history or (now - fan_history[-1][0]).total_seconds() > local_check_interval * 1.5: # Add point if last is old
+                    fan_history.append((now, fan_state))
+            pass # Pruning is handled at the start of the loop
+
 
         # Wait for the next check interval
         stop_thread.wait(local_check_interval)
@@ -529,14 +570,18 @@ def update_settings():
             settings_to_save = current_settings.copy() # Start with current
             settings_to_save.update(updated_settings) # Apply validated updates
 
+            # Ensure positive values for intervals/duration before saving
+            settings_to_save['history_duration_hours'] = max(1, int(settings_to_save.get('history_duration_hours', DEFAULT_SETTINGS['history_duration_hours'])))
+            settings_to_save['check_interval_seconds'] = max(1, int(settings_to_save.get('check_interval_seconds', DEFAULT_SETTINGS['check_interval_seconds'])))
+
             saved_ok = save_settings(settings_to_save) # Save the combined dict
             if saved_ok:
                 # Update global runtime variables from the saved settings
                 current_settings = settings_to_save.copy() # Update the global current_settings
                 derive_byte_commands(update_global=True) # Update derived byte commands
                 # Update other derived global settings
-                history_duration = timedelta(hours=int(current_settings.get("history_duration_hours", DEFAULT_SETTINGS["history_duration_hours"])))
-                check_interval = int(current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))
+                history_duration = timedelta(hours=current_settings['history_duration_hours'])
+                check_interval = current_settings['check_interval_seconds']
 
                 flash('Settings updated successfully!', 'success')
                 # Consider restarting serial if port changed (not currently in form)
@@ -547,105 +592,114 @@ def update_settings():
 
     return redirect(url_for('index')) # Redirect back to the main page
 
-@app.route('/status')
-def status():
-    """API endpoint for current status (for potential JS updates)."""
-    with state_lock:
-        status_data = {
-            'current_temp': current_temp,
-            'fan_state': fan_state,
-            'last_error': last_error
-        }
-    with settings_lock:
-        # Also include settings in status if needed by JS
-        status_data.update({
-            'threshold_ceiling': current_settings.get('threshold_ceiling'),
-            'threshold_floor': current_settings.get('threshold_floor'),
-            'check_interval_seconds': current_settings.get('check_interval_seconds', DEFAULT_SETTINGS['check_interval_seconds']),
-            'history_duration_hours': current_settings.get('history_duration_hours', DEFAULT_SETTINGS['history_duration_hours'])
-        })
-    return jsonify(status_data)
-
 @app.route('/chart_data')
 def chart_data():
     """API endpoint providing data for the history chart."""
     now = datetime.now()
     with settings_lock: # Get history duration from settings
+        # Use the potentially updated history_duration from settings
         local_history_duration = timedelta(hours=int(current_settings.get("history_duration_hours", DEFAULT_SETTINGS["history_duration_hours"])))
-    cutoff = now - local_history_duration
 
+    # Maximum allowed start time based on configured duration
+    max_cutoff_time = now - local_history_duration
+
+    with state_lock: # Lock access to fan_history and fan_state
+        # Create a copy of the history that is within the max duration window *plus a small buffer*
+        # This ensures we have the event just before max_cutoff_time if it exists
+        history_copy_raw = list(fan_history) # Get the raw history deque content
+        history_copy = [item for item in history_copy_raw if item[0] >= max_cutoff_time - timedelta(seconds=current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))] # Filter within window + buffer
+
+        current_fan_state_for_calc = fan_state # Get current state under lock
+
+    # --- Determine the actual charting window start time ---
+    # It's the later of: max_cutoff_time OR the timestamp of the earliest event in history_copy
+    # If history_copy is empty, the effective start is 'now' (duration 0), or max_cutoff_time if we want to chart the full empty window
+    # Based on the user's request ("真实统计到的时间数据"), if history is empty, the charted duration should be near zero,
+    # OR if the app just started, show the current state extending back to max_cutoff_time.
+    # Let's base the window start on the *earliest available history point* but not before max_cutoff_time.
+
+    chart_window_start_time = max_cutoff_time # Default to max cutoff if no history within or before window
+
+    if history_copy:
+        # Find the timestamp of the very first event we have after pruning/filtering
+        first_event_time = history_copy[0][0]
+        chart_window_start_time = max(max_cutoff_time, first_event_time)
+    # else: If history_copy is empty, chart_window_start_time remains max_cutoff_time.
+    # This means if history is empty, the chart will show the current state over the full max duration window.
+    # If that's not desired (user wants 0 duration for empty history), change this to `chart_window_start_time = now` if history_copy is empty.
+    # Let's stick to showing current state over the requested max duration if history is empty, as it's less jarring than an empty chart.
+    # If history is NOT empty, we respect the earliest history point.
+
+    # Ensure window is valid (start time is before now)
+    if chart_window_start_time > now:
+        chart_window_start_time = now # Correct if clock moved backwards or very short window
+
+    total_duration_for_charts = now - chart_window_start_time
+    total_charted_seconds = total_duration_for_charts.total_seconds()
+
+    # Handle cases where the duration is zero or negative
+    if total_charted_seconds <= 0:
+        chart_data = {
+            'on_percentage': 100 if current_fan_state_for_calc else 0,
+            'off_percentage': 100 if not current_fan_state_for_calc else 0,
+            'total_on_seconds': 0,
+            'total_off_seconds': 0,
+            'history_segments': [],
+            'total_charted_seconds': 0 # Report 0 total seconds
+        }
+        return jsonify(chart_data)
+
+    # --- Calculate Pie Chart Data (Total ON/OFF time in the actual charting window) ---
     total_on_time = timedelta(0)
     total_off_time = timedelta(0)
 
-    segments = [] # List to hold history segments for the bar chart
+    # Determine the state active *at* the beginning of the charting window
+    state_at_chart_window_start = _get_state_at_time(chart_window_start_time, history_copy_raw, current_fan_state_for_calc) # Use raw history for state lookup
 
-    with state_lock: # Lock access to fan_history and fan_state
-        history_copy = list(fan_history) # Work on a copy
-        current_fan_state_for_calc = fan_state # Get current state under lock
+    current_interval_start_for_pie = chart_window_start_time
+    current_state_in_interval_for_pie = state_at_chart_window_start
 
-    # --- Calculate Pie Chart Data (Total ON/OFF time in window) ---
-    # This logic accounts for the state at the very beginning of the window
-    last_time_for_pie = cutoff
-    state_at_cutoff_for_pie = current_fan_state_for_calc # Assume current state extends back to cutoff
-
-    # Find the last state entry at or before the cutoff time
-    for ts, state in reversed(history_copy):
-        if ts <= cutoff:
-            state_at_cutoff_for_pie = state
-            break
-    # If no event found <= cutoff, state_at_cutoff_for_pie remains current_fan_state_for_calc
-
-    current_state_for_pie_calc = state_at_cutoff_for_pie
-
+    # Iterate through history events that are *after* the window start
     for ts, state in history_copy:
-        if ts > cutoff: # Only consider events within or after the window start
-            # Time duration from the last event (or cutoff) to this event
-            duration = ts - max(last_time_for_pie, cutoff)
-            if duration > timedelta(0):
-                if current_state_for_pie_calc:
+        if ts > chart_window_start_time:
+            # This event ends the current interval for calculation
+            interval_end_time = ts
+            duration = interval_end_time - current_interval_start_for_pie
+
+            if duration > timedelta(0): # Ensure positive duration
+                if current_state_in_interval_for_pie:
                     total_on_time += duration
                 else:
                     total_off_time += duration
 
-            last_time_for_pie = ts # Update last event time
-            current_state_for_pie_calc = state # Update state for the next interval
+            # Start new interval
+            current_interval_start_for_pie = interval_end_time
+            current_state_in_interval_for_pie = state
 
-    # Account for time from the last history event in the window until 'now'
-    duration_since_last_event = now - max(last_time_for_pie, cutoff)
-    if duration_since_last_event > timedelta(0):
-        if current_fan_state_for_calc: # Use the actual current state
-            total_on_time += duration_since_last_event
+    # Account for time from the last history event in the window (or window start) until 'now'
+    duration_last_interval_for_pie = now - current_interval_start_for_pie
+    if duration_last_interval_for_pie > timedelta(0):
+        # The state for this final interval is the current state of the fan
+        if current_fan_state_for_calc:
+            total_on_time += duration_last_interval_for_pie
         else:
-            total_off_time += duration_since_last_event
+            total_off_time += duration_last_interval_for_pie
 
-    total_duration_seconds = local_history_duration.total_seconds() # Total window duration in seconds
-    on_percentage = (total_on_time.total_seconds() / total_duration_seconds) * 100 if total_duration_seconds > 0 else 0
+
+    on_percentage = (total_on_time.total_seconds() / total_charted_seconds) * 100
     off_percentage = 100 - on_percentage
 
+
     # --- Generate History Timeline Segments for Bar Chart ---
-    # Find the state at the start of the window (cutoff)
-    state_at_cutoff_for_segments = current_fan_state_for_calc # Default assumption
+    segments = []
+    current_segment_start_time = chart_window_start_time
+    # The state at the start of the first segment is the state active at chart_window_start_time
+    current_segment_state = state_at_chart_window_start
 
-    # Find the last event strictly before the cutoff time
-    last_event_before_cutoff = None
+
+    # Iterate through history events that are *after* the window start
     for ts, state in history_copy:
-        if ts < cutoff:
-            last_event_before_cutoff = (ts, state)
-        else: # Events are now at or after cutoff, stop searching backwards
-            break
-
-    if last_event_before_cutoff:
-        state_at_cutoff_for_segments = last_event_before_cutoff[1]
-    # If no event is strictly before cutoff, state_at_cutoff_for_segments remains current_fan_state_for_calc
-
-
-    current_segment_start_time = cutoff
-    current_segment_state = state_at_cutoff_for_segments
-
-    # Iterate through events that are within or after the window
-    # We only care about events strictly *after* the cutoff to define segment boundaries
-    for ts, state in history_copy:
-        if ts > cutoff:
+        if ts > chart_window_start_time:
             # This event marks the end of the current segment and start of the next
             segment_end_time = ts
             duration = segment_end_time - current_segment_start_time
@@ -661,13 +715,13 @@ def chart_data():
             current_segment_start_time = segment_end_time
             current_segment_state = state
 
-    # Add the final segment from the last event time within the window (or cutoff) to 'now'
-    duration_last = now - current_segment_start_time
-    if duration_last > timedelta(0):
+    # Add the final segment from the last event time within the window (or window start) to 'now'
+    duration_last_segment = now - current_segment_start_time
+    if duration_last_segment > timedelta(0):
         # The state of the final segment is the current state of the fan
         segments.append({
             'state': 'ON' if current_fan_state_for_calc else 'OFF',
-            'duration_seconds': duration_last.total_seconds()
+            'duration_seconds': duration_last_segment.total_seconds()
         })
 
     # Ensure segments are ordered by time (they should be based on history processing, but confirm)
@@ -678,7 +732,8 @@ def chart_data():
         'off_percentage': round(off_percentage, 1),
         'total_on_seconds': round(total_on_time.total_seconds()),
         'total_off_seconds': round(total_off_time.total_seconds()),
-        'history_segments': segments # Add the new data for the bar chart
+        'history_segments': segments, # Add the new data for the bar chart
+        'total_charted_seconds': round(total_charted_seconds) # Add actual duration in seconds
     }
     return jsonify(chart_data)
 
