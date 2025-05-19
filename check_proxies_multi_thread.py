@@ -1,5 +1,7 @@
 import json
 import logging
+import yaml
+import shutil
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -55,10 +57,11 @@ def test_proxy(ip, port, timeout=2):
     except RequestException as e:
         logging.error(f'Error: Could not connect to {ip}:{port} via proxy - {e}')
     return False
-
 def main():
     input_file = 'proxies.txt'
-    output_file = 'proxies-new.yaml'
+    output_file = 'proxies.yaml'
+    # 目标目录路径
+    dest_dir = '/Users/siyushi/Library/ApplicationSupport/io.github.clash-verge-rev.clash-verge-rev/'
 
     default_ports_to_try = [7890, 7893]
     max_threads = 50
@@ -70,19 +73,26 @@ def main():
     city_counter = defaultdict(int)
 
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
-        test_futures = []
+        port_futures = {}
         for proxy in proxies:
             ip = proxy.split(':')[0]
-            logging.info(f'Testing {ip}...')
-            ##todo 阻塞
-            ports_to_try = get_http_port(proxy)
-            if len(ports_to_try) == 0:
+            logging.info(f'Scanning ports for {ip}...')
+            future = executor.submit(get_http_port, proxy)
+            port_futures[future] = ip
+
+        proxy_test_futures = []
+        for port_future in as_completed(port_futures):
+            ip = port_futures[port_future]
+            ports_to_try = port_future.result()
+            if not ports_to_try:
                 ports_to_try = default_ports_to_try
             for port in ports_to_try:
+                logging.info(f'Testing {ip}:{port}...')
                 future = executor.submit(test_proxy, ip, port)
-                test_futures.append((ip, port, future))
+                proxy_test_futures.append((ip, port, future))
+
         location_futures = {}
-        for ip, port, future in test_futures:
+        for ip, port, future in proxy_test_futures:
             result = future.result()
             if result:
                 loc_future = executor.submit(get_ip_location, ip)
@@ -105,10 +115,8 @@ def main():
     }
 
     with open(output_file, 'w') as f:
-        import yaml
         yaml.dump(clash_config, f, allow_unicode=True, default_flow_style=False)
-
     logging.info(f'Configuration saved to {output_file}')
-
+    #shutil.copy(output_file, dest_dir)
 if __name__ == '__main__':
     main()

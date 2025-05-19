@@ -1,0 +1,25 @@
+proxies:
+- name: 未知1
+  port: 7890
+  server: 120.26.95.217
+  type: http
+- name: 未知2
+  port: 11111
+  server: 61.174.174.48
+  type: http
+- name: 未知3
+  port: 17890
+  server: 112.193.164.16
+  type: http
+- name: 未知4
+  port: 7890
+  server: 39.172.62.254
+  type: http
+- name: 未知5
+  port: 6660
+  server: 14.19.177.8
+  type: http
+- name: 未知6
+  port: 17893
+  server: 112.193.164.16
+  type: http
