@@ -117,6 +117,6 @@ def main():
     with open(output_file, 'w') as f:
         yaml.dump(clash_config, f, allow_unicode=True, default_flow_style=False)
     logging.info(f'Configuration saved to {output_file}')
-    #shutil.copy(output_file, dest_dir)
+   # shutil.copy(output_file, dest_dir)
 if __name__ == '__main__':
     main()

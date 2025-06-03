@@ -1,4 +1,3 @@
-外接风扇控制镜像
 
 let regex = /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}:[0-9]+/g;
 let matches = document.body.innerText.match(regex);
