@@ -1,9 +1,0 @@
-proxies:
-- name: 未知1
-  port: 7878
-  server: 116.231.231.128
-  type: http
-- name: 未知2
-  port: 7898
-  server: 171.213.236.41
-  type: http
