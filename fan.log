@@ -200,3 +200,289 @@
 2025-04-26 17:31:04 [INFO] --- Application Starting ---
 2025-04-26 23:10:35 [INFO] --- Application Starting ---
 2025-11-25 02:52:42 [INFO] --- Application Starting ---
+2026-02-19 00:35:37 [INFO] --- Application Starting ---
+2026-02-19 01:21:33 [INFO] --- Application Starting ---
+2026-02-19 01:21:59 [INFO] --- Application Starting ---
+2026-02-19 01:21:59 [INFO] Attempting to load settings from ./config/settings.json
+2026-02-19 01:21:59 [WARNING] Config file not found. Using default settings.
+2026-02-19 01:21:59 [INFO] Attempting to save settings to ./config/settings.json
+2026-02-19 01:21:59 [INFO] Settings successfully saved.
+2026-02-19 01:21:59 [INFO] Starting fan control background thread.
+2026-02-19 01:21:59 [INFO] Fan control thread started.
+2026-02-19 01:21:59 [INFO] Starting Flask server on 0.0.0.0:4812
+2026-02-19 01:21:59 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:21:59 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:21:59 [WARNING] Initial serial connection failed. Thread will retry.
+2026-02-19 01:21:59 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:21:59 [WARNING] Could not get initial temperature. Assuming fan OFF initially.
+2026-02-19 01:21:59 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2026-02-19 01:21:59 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:21:59 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:21:59 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:21:59 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:21:59 [INFO] Stopping fan control background thread.
+2026-02-19 01:21:59 [INFO] Fan control thread stopping.
+2026-02-19 01:22:32 [INFO] --- Application Starting ---
+2026-02-19 01:22:32 [INFO] Attempting to load settings from ./config/settings.json
+2026-02-19 01:22:32 [INFO] Successfully loaded settings from file.
+2026-02-19 01:22:32 [INFO] Starting fan control background thread.
+2026-02-19 01:22:32 [INFO] Fan control thread started.
+2026-02-19 01:22:32 [INFO] Starting Flask server on 0.0.0.0:4813
+2026-02-19 01:22:32 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:22:32 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:22:32 [WARNING] Initial serial connection failed. Thread will retry.
+2026-02-19 01:22:32 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:32 [WARNING] Could not get initial temperature. Assuming fan OFF initially.
+2026-02-19 01:22:32 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2026-02-19 01:22:32 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:22:32 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:22:32 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:32 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:22:32 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4813
+ * Running on http://192.168.2.219:4813
+2026-02-19 01:22:32 [INFO] [33mPress CTRL+C to quit[0m
+2026-02-19 01:22:37 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:37 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:22:42 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:42 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:22:47 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:47 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:22:49 [INFO] 127.0.0.1 - - [19/Feb/2026 01:22:49] "GET / HTTP/1.1" 200 -
+2026-02-19 01:22:50 [INFO] 127.0.0.1 - - [19/Feb/2026 01:22:50] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:22:51 [INFO] 127.0.0.1 - - [19/Feb/2026 01:22:51] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-19 01:22:52 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:52 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:22:55 [INFO] 127.0.0.1 - - [19/Feb/2026 01:22:55] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:22:57 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:22:57 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:00 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:00] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:02 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:02 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:05 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:05] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:07 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:07 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:10 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:10] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:12 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:12 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:15 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:15] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:17 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:17 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:20 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:20] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:22 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:22 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:25 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:25] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:27 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:27 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:30 [INFO] 127.0.0.1 - - [19/Feb/2026 01:23:30] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:23:32 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:23:32 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:23:32 [INFO] --- Application Stopping ---
+2026-02-19 01:23:32 [INFO] Stopping fan control background thread.
+2026-02-19 01:23:32 [INFO] Fan control thread stopping.
+2026-02-19 01:48:15 [INFO] --- Application Starting ---
+2026-02-19 01:48:15 [INFO] Attempting to load settings from ./config/settings.json
+2026-02-19 01:48:15 [INFO] Successfully loaded settings from file.
+2026-02-19 01:48:15 [INFO] Starting fan control background thread.
+2026-02-19 01:48:15 [INFO] Fan control thread started.
+2026-02-19 01:48:15 [INFO] Starting Flask server on 0.0.0.0:4814
+2026-02-19 01:48:15 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:48:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:48:15 [WARNING] Initial serial connection failed. Thread will retry.
+2026-02-19 01:48:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:15 [WARNING] Could not get initial temperature. Assuming fan OFF initially.
+2026-02-19 01:48:15 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2026-02-19 01:48:15 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 01:48:15 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 01:48:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:15 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:15 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4814
+ * Running on http://192.168.2.219:4814
+2026-02-19 01:48:15 [INFO] [33mPress CTRL+C to quit[0m
+2026-02-19 01:48:20 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:20 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:25 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:25 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:28] "GET / HTTP/1.1" 200 -
+2026-02-19 01:48:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:28] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-02-19 01:48:30 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:30 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:33 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:33] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:35 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:35 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:38 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:38] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:40 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:40 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:43 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:43] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:45 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:45 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:48 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:48] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:50 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:50 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:53 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:53] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:48:55 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:48:55 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:48:58 [INFO] 127.0.0.1 - - [19/Feb/2026 01:48:58] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:00 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:00 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:03 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:03] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:05 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:05 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:08 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:08] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:10 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:10 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:13 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:13] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:15 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:15 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:18 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:18] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:20 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:20 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:23 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:23] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:25 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:25 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:28] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:30 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:30 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:33 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:33] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:35 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:35 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:38 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:38] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:41 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:41 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:43 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:43] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:46 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:46 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:48 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:48] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:51 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:51 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:53 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:53] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:49:56 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:49:56 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:49:58 [INFO] 127.0.0.1 - - [19/Feb/2026 01:49:58] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:01 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:01 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:03 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:03] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:06 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:06 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:08 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:08] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:11 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:11 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:13 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:13] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:16 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:16 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:18 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:18] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:21 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:21 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:23 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:23] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:26 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:26 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:28] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:31 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:31 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:33 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:33] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:36 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:36 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:38 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:38] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:41 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:41 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:43 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:43] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:46 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:46 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:48 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:48] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:51 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:51 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:53 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:53] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:50:56 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:50:56 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:50:58 [INFO] 127.0.0.1 - - [19/Feb/2026 01:50:58] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:01 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:01 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:03 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:03] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:06 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:06 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:08 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:08] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:11 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:11 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:13 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:13] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:16 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:16 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:18 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:18] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:21 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:21 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:23 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:23] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:26 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:26 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:28 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:28] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:31 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:31 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:33 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:33] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:36 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:36 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:38 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:38] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:41 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 01:51:41 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 01:51:43 [INFO] 127.0.0.1 - - [19/Feb/2026 01:51:43] "GET /chart_data HTTP/1.1" 200 -
+2026-02-19 01:51:44 [INFO] --- Application Stopping ---
+2026-02-19 01:51:44 [INFO] Stopping fan control background thread.
+2026-02-19 01:51:44 [INFO] Fan control thread stopping.
+2026-02-19 02:27:53 [INFO] --- Application Starting ---
+2026-02-19 02:28:10 [INFO] --- Application Starting ---
+2026-02-19 02:28:10 [INFO] Attempting to load settings from ./config_local/settings.json
+2026-02-19 02:28:10 [WARNING] Config file not found. Using default settings.
+2026-02-19 02:28:10 [INFO] Attempting to save settings to ./config_local/settings.json
+2026-02-19 02:28:10 [INFO] Settings successfully saved.
+2026-02-19 02:28:10 [INFO] Starting fan control background thread.
+2026-02-19 02:28:10 [INFO] Fan control thread started.
+2026-02-19 02:28:10 [INFO] Starting Flask server on 0.0.0.0:4812
+2026-02-19 02:28:10 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 02:28:10 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 02:28:10 [WARNING] Initial serial connection failed. Thread will retry.
+2026-02-19 02:28:10 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:28:10 [WARNING] Could not get initial temperature. Assuming fan OFF initially.
+2026-02-19 02:28:10 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2026-02-19 02:28:10 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 02:28:10 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 02:28:10 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:28:10 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:28:10 [INFO] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:4812
+ * Running on http://192.168.2.219:4812
+2026-02-19 02:28:10 [INFO] [33mPress CTRL+C to quit[0m
+2026-02-19 02:28:12 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:28:12 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:28:14 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:28:14 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:28:15 [INFO] 127.0.0.1 - - [19/Feb/2026 02:28:15] "GET / HTTP/1.1" 200 -
+2026-02-19 02:28:15 [INFO] 127.0.0.1 - - [19/Feb/2026 02:28:15] "GET / HTTP/1.1" 200 -
+2026-02-19 02:28:16 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:28:16 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:34:45 [INFO] --- Application Starting ---
+2026-02-19 02:34:58 [INFO] --- Application Starting ---
+2026-02-19 02:34:58 [INFO] Attempting to load settings from ./config_local/settings.json
+2026-02-19 02:34:58 [WARNING] Config file not found. Using default settings.
+2026-02-19 02:34:58 [INFO] Attempting to save settings to ./config_local/settings.json
+2026-02-19 02:34:58 [INFO] Settings successfully saved.
+2026-02-19 02:34:58 [INFO] Starting fan control background thread.
+2026-02-19 02:34:58 [INFO] Fan control thread started.
+2026-02-19 02:34:58 [INFO] Starting Flask server on 0.0.0.0:4812
+2026-02-19 02:34:58 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 02:34:58 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 02:34:58 [WARNING] Initial serial connection failed. Thread will retry.
+2026-02-19 02:34:58 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:34:58 [WARNING] Could not get initial temperature. Assuming fan OFF initially.
+2026-02-19 02:34:58 [WARNING] Serial port not available trying to turn fan OFF. Attempting reconnect.
+2026-02-19 02:34:58 [INFO] Attempting to open serial port /dev/ttyUSB0 at 9600 baud.
+2026-02-19 02:34:58 [ERROR] Cannot open serial port /dev/ttyUSB0: [Errno 2] could not open port /dev/ttyUSB0: [Errno 2] No such file or directory: '/dev/ttyUSB0'
+2026-02-19 02:34:58 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:34:58 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:35:00 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:35:00 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:35:02 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:35:02 [WARNING] Failed to get temperature reading. Skipping state check this cycle.
+2026-02-19 02:35:04 [ERROR] Temperature file /sys/class/hwmon/hwmon0/temp1_input not found. Check path in settings.
+2026-02-19 02:35:04 [WARNING] Failed to get temperature reading. Skipping state check this cycle.

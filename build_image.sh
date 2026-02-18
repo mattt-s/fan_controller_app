@@ -15,3 +15,6 @@ docker buildx inspect --bootstrap
 
 # Build and push
 docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE_NAME:$TAG" --push .
+
+# Also update local image for current architecture
+docker pull "$IMAGE_NAME:$TAG"

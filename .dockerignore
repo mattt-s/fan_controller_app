@@ -1,0 +1,16 @@
+.git
+.gitignore
+.idea
+.vscode
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+*.log
+*.iml
+Dockerfile
+build_image.sh
+README.txt

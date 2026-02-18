@@ -47,10 +47,14 @@ check_interval = DEFAULT_SETTINGS["check_interval_seconds"] # Derived from setti
 
 
 # --- Logging Setup ---
+# Simplest way to stop access logs: Set werkzeug logger to ERROR only
+# This suppresses all "GET /..." access logs, keeping only application errors/info.
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
 logging.basicConfig(filename='fan.log', # Log file location can also be configurable
                     level=logging.INFO,
                     format='%(asctime)s [%(levelname)s] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+                     datefmt='%Y-%m-%d %H:%M:%S')
 
 def write_log(level, message):
     """Logs messages to file and console."""

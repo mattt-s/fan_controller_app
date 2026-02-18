@@ -16,7 +16,14 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install debugpy
 # Copy the rest of the application code into the container at /app
-COPY . .
+# Copy only necessary files
+COPY requirements.txt .
+COPY app.py .
+COPY static static
+COPY templates templates
+# Config directory is optional to copy if you want defaults baked in, 
+# but usually it's mounted. create mount point.
+
 
 # Make port 4812 available to the world outside this container
 EXPOSE 4812
