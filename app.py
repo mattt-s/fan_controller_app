@@ -22,11 +22,12 @@ DEFAULT_SETTINGS = {
     "history_duration_hours": 24 # Default maximum history duration
 }
 # --- Persistent Configuration File Path (inside container) ---
-CONFIG_DIR = "/config"
+# --- Persistent Configuration File Path (inside container) ---
+CONFIG_DIR = os.getenv("CONFIG_DIR", "/config")
 CONFIG_FILE_PATH = os.path.join(CONFIG_DIR, "settings.json")
 
 # --- Web Server Port ---
-WEB_PORT = 4812
+WEB_PORT = int(os.getenv("WEB_PORT", 4812))
 
 # --- Global Variables & Shared State ---
 current_settings = {} # Loaded from file or defaults
