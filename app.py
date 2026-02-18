@@ -18,7 +18,7 @@ DEFAULT_SETTINGS = {
     "command_open_hex": "A00101A2",
     "command_close_hex": "A00100A1",
     "temp_path": "/sys/class/hwmon/hwmon0/temp1_input",
-    "check_interval_seconds": 5,
+    "check_interval_seconds": 2,
     "history_duration_hours": 24 # Default maximum history duration
 }
 # --- Persistent Configuration File Path (inside container) ---
@@ -614,6 +614,8 @@ def chart_data():
         history_copy = [item for item in history_copy_raw if item[0] >= max_cutoff_time - timedelta(seconds=current_settings.get("check_interval_seconds", DEFAULT_SETTINGS["check_interval_seconds"]))] # Filter within window + buffer
 
         current_fan_state_for_calc = fan_state # Get current state under lock
+        current_temp_for_api = current_temp
+        last_error_for_api = last_error
 
     # --- Determine the actual charting window start time ---
     # It's the later of: max_cutoff_time OR the timestamp of the earliest event in history_copy
@@ -703,7 +705,10 @@ def chart_data():
         'total_on_seconds': round(total_on_time.total_seconds()),
         'total_off_seconds': round(total_off_time.total_seconds()),
         # 'history_segments': segments, # Removed
-        'total_charted_seconds': round(total_charted_seconds) # Add actual duration in seconds
+        'total_charted_seconds': round(total_charted_seconds), # Add actual duration in seconds
+        'current_temp': current_temp_for_api,
+        'fan_state': "ON" if current_fan_state_for_calc else "OFF",
+        'last_error': last_error_for_api
     }
     return jsonify(chart_data)
 

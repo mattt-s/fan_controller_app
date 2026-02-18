@@ -484,36 +484,49 @@
              </div>`;
         }
 
+        function updateStatus(data) {
+            // Update Temperature
+            const tempVal = data.current_temp;
+            document.getElementById('current-temp').innerText = (tempVal !== null && tempVal !== undefined) ? Number(tempVal).toFixed(1) : "N/A";
+
+            // Update Fan State Text
+            const stateText = data.fan_state; // "ON" or "OFF"
+            document.getElementById('fan-state-text').innerText = stateText;
+
+            // Update Fan Icon Animation/Color
+            const fanIcon = document.getElementById('fan-icon');
+            if (stateText === "ON") {
+                fanIcon.classList.remove('fan-off');
+                fanIcon.classList.add('fan-on');
+            } else {
+                fanIcon.classList.remove('fan-on');
+                fanIcon.classList.add('fan-off');
+            }
+        }
+
         // Initialize Chart
         fetch('/chart_data')
             .then(response => response.json())
             .then(data => {
                 updateChartTitles(data.total_charted_seconds);
                 updatePieChart(data);
+                updateStatus(data); // Initial status update
             })
             .catch(error => {
                 console.error('Error fetching chart data:', error);
                 document.getElementById('chart-stats').innerText = 'Failed to load data.';
             });
 
-        // Optional: Dynamic icon update via JS if page isn't reloaded
-        // Not strictly needed if standard Flask refresh is used, but good for "modern" feel
-        // Adding checking loop for simple auto-refresh
+        // Dynamic update loop
         setInterval(() => {
-            // We can reload to get fresh data or fetch an API. 
-            // For now, let's just refresh the page every 30 seconds to update status? 
-            // Or better, just refresh the chart data nicely.
-            // If we want real-time icon updates, we need a status endpoint.
-            // Given 'app.py' doesn't have a pure status JSON endpoint except via index render,
-            // we won't fully implement SPA behavior without backend changes.
-            // We just re-fetch chart data for now.
             fetch('/chart_data')
                 .then(response => response.json())
                 .then(data => {
                     updateChartTitles(data.total_charted_seconds);
                     updatePieChart(data);
+                    updateStatus(data); // Real-time status update
                 });
-        }, 5000);
+        }, 2000);
 
     </script>
 </body>
