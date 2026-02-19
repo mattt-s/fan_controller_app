@@ -1,186 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fan Control</title>
+    <title>Fan Control Panel</title>
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        body { padding-top: 20px; }
-        .status-indicator {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-left: 10px;
-            vertical-align: middle;
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
         }
-        .status-on { background-color: limegreen; }
-        .status-off { background-color: red; }
-        .error-banner { margin-top: 15px; }
-        .chart-container { max-width: 400px; margin: 20px auto; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding-top: 30px;
+            padding-bottom: 50px;
+        }
+
+        .dashboard-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            background-color: var(--card-bg);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            padding: 1.25rem 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Fan Icon Animation */
+        .fan-icon-wrapper {
+            font-size: 4rem;
+            /* Initial large size */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+            transition: color 0.3s ease;
+        }
+
+        .fan-icon {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fan-on {
+            color: var(--success-color);
+            animation: spin 1s linear infinite;
+        }
+
+        .fan-off {
+            color: var(--danger-color);
+            animation: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .config-detail {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* Settings Form Styling */
+        .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group-text {
+            background-color: #f1f3f5;
+            border-color: #ced4da;
+            color: #495057;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 10px 24px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #357abd;
+            border-color: #357abd;
+            transform: translateY(-1px);
+        }
+
+        /* Specific text colors for thresholds */
+        .text-threshold-ceiling {
+            color: #d63384;
+            font-weight: 600;
+        }
+
+        .text-threshold-floor {
+            color: #20c997;
+            font-weight: 600;
+        }
+
+        .threshold-card {
+            background-color: #fcfcfc;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Chart container */
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h1 class="mb-4">Fan Control Status</h1>
+    <div class="container">
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Current Status</h5>
-            <p><strong>Temperature:</strong> <span id="current-temp">{{ current_temp }}</span> °C</p>
-            <p><strong>Fan State:</strong>
-                <span id="fan-state-text">{{ fan_state }}</span>
-                <span id="fan-state-indicator" class="status-indicator {{ 'status-on' if fan_state == 'ON' else 'status-off' }}"></span>
-            </p>
-            <p><small>Monitoring Temp Path: {{ temp_path }}</small></p>
-            <p><small>Using Serial Port: {{ serial_port }}</small></p>
-            {% if last_error %}
-            <div class="alert alert-danger error-banner" role="alert">
-                <strong>Error:</strong> {{ last_error }}
-            </div>
-            {% endif %}
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1><i class="fas fa-microchip me-2"></i>Fan Control Panel</h1>
+            <p class="text-muted">System Temperature & Fan Management</p>
         </div>
-    </div>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Update Settings</h5>
-            <form action="{{ url_for('update_settings') }}" method="post">
-                <div class="row g-3 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label for="threshold_ceiling" class="col-form-label">Turn Fan ON above (°C):</label>
-                    </div>
-                    <div class="col-auto">
-                        <input type="number" step="0.1" id="threshold_ceiling" name="threshold_ceiling" class="form-control" value="{{ threshold_ceiling }}">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }} me-2"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Status Cards Row -->
+        <div class="row mb-4">
+            <!-- Temperature Card -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center d-flex flex-column justify-content-center">
+                        <div class="status-label">Current Temperature</div>
+                        <div class="status-value text-primary">
+                            <span id="current-temp">{{ current_temp }}</span><small>°C</small>
+                        </div>
+                        <div class="config-detail" title="{{ temp_path }}">
+                            <i class="fas fa-folder-open me-1"></i>Path: {{ temp_path }}
+                        </div>
                     </div>
                 </div>
-                <div class="row g-3 align-items-center mb-3">
-                    <div class="col-auto">
-                        <label for="threshold_floor" class="col-form-label">Turn Fan OFF below (°C):</label>
-                    </div>
-                    <div class="col-auto">
-                        <input type="number" step="0.1" id="threshold_floor" name="threshold_floor" class="form-control" value="{{ threshold_floor }}">
+            </div>
+
+            <!-- Fan State Card -->
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center d-flex flex-column justify-content-center">
+                        <div class="status-label">Fan State</div>
+                        <!-- Animated Fan Icon -->
+                        <div class="fan-icon-wrapper mb-2">
+                            <i id="fan-icon"
+                                class="fas fa-fan fan-icon {{ 'fan-on' if fan_state == 'ON' else 'fan-off' }}"></i>
+                        </div>
+                        <div class="status-value">
+                            <span id="fan-state-text">{{ fan_state }}</span>
+                        </div>
+                        <div class="config-detail" title="{{ serial_port }}">
+                            <i class="fas fa-plug me-1"></i>Port: {{ serial_port }}
+                        </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Update Thresholds</button>
-            </form>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Fan Usage (Last 24 Hours)</h5>
-            <div class="chart-container">
-                <canvas id="fanUsageChart"></canvas>
             </div>
-            <p class="text-center small" id="chart-stats"></p>
+        </div>
+
+        <!-- Error Banner (if any) -->
+        {% if last_error %}
+        <div class="alert alert-danger shadow-sm mb-4" role="alert">
+            <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>System Error</h5>
+            <p class="mb-0">{{ last_error }}</p>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <!-- Settings Column -->
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <i class="fas fa-sliders-h me-2"></i>Configuration
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('update_settings') }}" method="post">
+
+                            <!-- Thresholds Section -->
+                            <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                    class="fas fa-thermometer-half me-1"></i>Temperature Thresholds</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="threshold-card border-start border-4 border-danger">
+                                        <label for="threshold_ceiling" class="form-label text-threshold-ceiling">
+                                            <i class="fas fa-arrow-up me-1"></i>Turn ON Above (°C)
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.1" id="threshold_ceiling"
+                                                name="threshold_ceiling" class="form-control"
+                                                value="{{ threshold_ceiling }}">
+                                            <span class="input-group-text">°C</span>
+                                        </div>
+                                        <small class="text-muted">Fan starts when temp hits this.</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="threshold-card border-start border-4 border-success">
+                                        <label for="threshold_floor" class="form-label text-threshold-floor">
+                                            <i class="fas fa-arrow-down me-1"></i>Turn OFF Below (°C)
+                                        </label>
+                                        <div class="input-group">
+                                            <input type="number" step="0.1" id="threshold_floor" name="threshold_floor"
+                                                class="form-control" value="{{ threshold_floor }}">
+                                            <span class="input-group-text">°C</span>
+                                        </div>
+                                        <small class="text-muted">Fan stops when temp drops to this.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted opacity-25">
+
+                            <!-- Commands Section -->
+                            <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                    class="fas fa-terminal me-1"></i>Serial Commands (Hex)</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label for="command_open_hex" class="form-label">ON Command</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text font-monospace">0x</span>
+                                        <input type="text" id="command_open_hex" name="command_open_hex"
+                                            class="form-control font-monospace" value="{{ command_open_hex }}"
+                                            pattern="[0-9a-fA-F]+" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="command_close_hex" class="form-label">OFF Command</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text font-monospace">0x</span>
+                                        <input type="text" id="command_close_hex" name="command_close_hex"
+                                            class="form-control font-monospace" value="{{ command_close_hex }}"
+                                            pattern="[0-9a-fA-F]+" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="my-4 text-muted opacity-25">
+
+                            <!-- Advanced Section (Path, History) -->
+                            <h6 class="text-uppercase text-muted fs-7 fw-bold mb-3"><i
+                                    class="fas fa-cogs me-1"></i>System & History</h6>
+                            <div class="mb-3">
+                                <label for="temp_path" class="form-label">Temperature File Path</label>
+                                <input type="text" id="temp_path" name="temp_path"
+                                    class="form-control font-monospace fs-7" value="{{ temp_path }}">
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="check_interval_seconds" class="form-label">Check Interval</label>
+                                    <div class="input-group">
+                                        <input type="number" id="check_interval_seconds" name="check_interval_seconds"
+                                            class="form-control" value="{{ check_interval_seconds }}">
+                                        <span class="input-group-text">sec</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="history_duration_hours" class="form-label">History Buffer</label>
+                                    <div class="input-group">
+                                        <input type="number" id="history_duration_hours" name="history_duration_hours"
+                                            class="form-control" value="{{ history_duration_hours }}">
+                                        <span class="input-group-text">hours</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg"><i
+                                        class="fas fa-save me-2"></i>Save Configuration</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Column -->
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header bg-white">
+                        <i class="fas fa-chart-pie me-2"></i>Usage Stats
+                    </div>
+                    <div class="card-body d-flex flex-column align-items-center">
+                        <h6 class="card-title text-center mb-3" id="pie-chart-title">Loading...</h6>
+
+                        <div class="chart-wrapper mb-3">
+                            <canvas id="fanUsageChart"></canvas>
+                        </div>
+
+                        <div id="chart-stats" class="text-center small text-muted mt-auto w-100 border-top pt-3">
+                            <!-- Stats injected by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-</div>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script>
+        let fanChart;
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
-<script>
-    let fanChart; // Variable to hold the chart instance
+        function formatDuration(seconds) {
+            if (seconds === null || seconds === undefined || seconds < 0) return "N/A";
+            if (seconds === 0) return "0s";
 
-    function updateChart(data) {
-        const ctx = document.getElementById('fanUsageChart').getContext('2d');
-        const chartData = {
-            labels: ['On Time (%)', 'Off Time (%)'],
-            datasets: [{
-                label: 'Fan Usage Ratio',
-                data: [data.on_percentage, data.off_percentage],
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)', // Greenish for ON
-                    'rgba(255, 99, 132, 0.6)'  // Reddish for OFF
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)'
-                ],
-                borderWidth: 1
-            }]
-        };
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
 
-        if (fanChart) {
-            // Update existing chart
-            fanChart.data.datasets[0].data = [data.on_percentage, data.off_percentage];
-            fanChart.update();
-        } else {
-            // Create new chart
-            fanChart = new Chart(ctx, {
-                type: 'pie', // Pie chart for ratio
-                data: chartData,
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label += ': ';
+            let durationString = '';
+            if (hours > 0) durationString += `${hours}h `;
+            if (minutes > 0 || hours > 0) durationString += `${minutes}m `;
+            if (remainingSeconds > 0 || durationString === '') durationString += `${remainingSeconds}s`;
+
+            return durationString.trim();
+        }
+
+        function updateChartTitles(totalSeconds) {
+            const durationString = formatDuration(totalSeconds);
+            document.getElementById('pie-chart-title').innerText = `History: ${durationString}`;
+        }
+
+        function updatePieChart(data) {
+            const ctx = document.getElementById('fanUsageChart').getContext('2d');
+            const chartData = {
+                labels: ['ON (%)', 'OFF (%)'],
+                datasets: [{
+                    data: [data.on_percentage, data.off_percentage],
+                    backgroundColor: [
+                        '#28a745', // Success Green
+                        '#dc3545'  // Danger Red
+                    ],
+                    hoverOffset: 4
+                }]
+            };
+
+            if (fanChart) {
+                fanChart.data.datasets[0].data = [data.on_percentage, data.off_percentage];
+                fanChart.update();
+            } else {
+                fanChart = new Chart(ctx, {
+                    type: 'doughnut', // Doughnut might look more modern than pie
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
                                     }
-                                    if (context.parsed !== null) {
-                                        label += context.parsed + '%';
-                                    }
-                                    return label;
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            const onDurationString = formatDuration(data.total_on_seconds);
+            const offDurationString = formatDuration(data.total_off_seconds);
+
+            document.getElementById('chart-stats').innerHTML =
+                `<div class="row">
+                <div class="col-6"><span class="text-success fw-bold">ON</span><br>${onDurationString}</div>
+                <div class="col-6"><span class="text-danger fw-bold">OFF</span><br>${offDurationString}</div>
+             </div>`;
         }
-         // Update stats text
-         const onHours = Math.floor(data.total_on_seconds / 3600);
-         const onMinutes = Math.floor((data.total_on_seconds % 3600) / 60);
-         const offHours = Math.floor(data.total_off_seconds / 3600);
-         const offMinutes = Math.floor((data.total_off_seconds % 3600) / 60);
-         document.getElementById('chart-stats').innerText =
-            `Total On: ${onHours}h ${onMinutes}m | Total Off: ${offHours}h ${offMinutes}m (in last 24h)`;
-    }
 
-    // Fetch chart data on page load
-    fetch('/chart_data')
-        .then(response => response.json())
-        .then(data => {
-            updateChart(data);
-        })
-        .catch(error => console.error('Error fetching chart data:', error));
+        function updateStatus(data) {
+            // Update Temperature
+            const tempVal = data.current_temp;
+            document.getElementById('current-temp').innerText = (tempVal !== null && tempVal !== undefined) ? Number(tempVal).toFixed(1) : "N/A";
 
-    // Optional: Auto-refresh status (every 10 seconds)
-    /*
-    setInterval(() => {
-         // Fetch status data
-         fetch('/status')
+            // Update Fan State Text
+            const stateText = data.fan_state; // "ON" or "OFF"
+            document.getElementById('fan-state-text').innerText = stateText;
+
+            // Update Fan Icon Animation/Color
+            const fanIcon = document.getElementById('fan-icon');
+            if (stateText === "ON") {
+                fanIcon.classList.remove('fan-off');
+                fanIcon.classList.add('fan-on');
+            } else {
+                fanIcon.classList.remove('fan-on');
+                fanIcon.classList.add('fan-off');
+            }
+        }
+
+        // Initialize Chart
+        fetch('/chart_data')
             .then(response => response.json())
             .then(data => {
-                document.getElementById('current-temp').innerText = data.current_temp !== null ? data.current_temp.toFixed(1) : "N/A";
-                const fanStateText = data.fan_state ? "ON" : "OFF";
-                const fanStateClass = data.fan_state ? "status-on" : "status-off";
-                document.getElementById('fan-state-text').innerText = fanStateText;
-                const indicator = document.getElementById('fan-state-indicator');
-                indicator.className = `status-indicator ${fanStateClass}`;
-                // Maybe update error display too
+                updateChartTitles(data.total_charted_seconds);
+                updatePieChart(data);
+                updateStatus(data); // Initial status update
             })
-            .catch(error => console.error('Error fetching status:', error));
+            .catch(error => {
+                console.error('Error fetching chart data:', error);
+                document.getElementById('chart-stats').innerText = 'Failed to load data.';
+            });
 
-         // Fetch and update chart data periodically too
-         fetch('/chart_data')
-            .then(response => response.json())
-            .then(data => {
-                updateChart(data);
-            })
-            .catch(error => console.error('Error fetching chart data:', error));
-    }, 10000); // Refresh every 10000 ms (10 seconds)
-    */
+        // Dynamic update loop
+        setInterval(() => {
+            fetch('/chart_data')
+                .then(response => response.json())
+                .then(data => {
+                    updateChartTitles(data.total_charted_seconds);
+                    updatePieChart(data);
+                    updateStatus(data); // Real-time status update
+                });
+        }, 2000);
 
-</script>
+    </script>
 </body>
+
 </html>

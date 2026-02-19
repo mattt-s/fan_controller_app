@@ -1,0 +1,11 @@
+{
+    "serial_port": "/dev/ttyUSB0",
+    "baud_rate": 9600,
+    "threshold_ceiling": 49.5,
+    "threshold_floor": 45.0,
+    "command_open_hex": "A00101A2",
+    "command_close_hex": "A00100A1",
+    "temp_path": "/sys/class/hwmon/hwmon0/temp1_input",
+    "check_interval_seconds": 5,
+    "history_duration_hours": 24
+}
