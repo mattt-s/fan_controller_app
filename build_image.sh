@@ -1,7 +1,7 @@
 #!/bin/bash
 # Build and push multi-arch Docker image
 IMAGE_NAME="killermatt/fan-controller"
-TAG="v4"
+TAG="latest"
 
 echo "Building multi-arch image: $IMAGE_NAME:$TAG for linux/amd64 and linux/arm64"
 
