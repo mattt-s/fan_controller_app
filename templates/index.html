@@ -190,6 +190,61 @@
             max-width: 500px;
             margin: 0 auto;
         }
+
+        /* Timeline Segment Interaction */
+        .timeline-segment {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            z-index: 1;
+            position: relative;
+        }
+
+        .timeline-segment:hover {
+            transform: scaleY(1.4);
+            z-index: 10;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        /* Custom Hover Tooltip for Timeline */
+        .timeline-segment::after {
+            content: attr(data-info);
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            white-space: pre;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline-segment::before {
+            content: '';
+            position: absolute;
+            bottom: 130%;
+            left: 50%;
+            transform: translateX(-50%) translateY(100%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.85);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+        }
+
+        .timeline-segment:hover::after,
+        .timeline-segment:hover::before {
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -405,7 +460,7 @@
                     <span id="timeline-end" class="font-monospace fw-bold">N/A</span>
                 </div>
                 <!-- Interactive Segmented Container -->
-                <div id="timeline-container" class="d-flex w-100 rounded overflow-hidden"
+                <div id="timeline-container" class="d-flex w-100 rounded"
                     style="height: 30px; background-color: #e9ecef; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
                 </div>
             </div>
@@ -537,8 +592,8 @@
                         const div = document.createElement('div');
                         div.style.width = seg.percentage + '%';
                         div.style.height = '100%';
-                        div.className = seg.state === 'ON' ? 'bg-success' : 'bg-danger';
-                        div.title = `${seg.start} - ${seg.end} (${seg.state})`;
+                        div.className = `timeline-segment ${seg.state === 'ON' ? 'bg-success' : 'bg-danger'}`;
+                        div.setAttribute('data-info', `State: ${seg.state}\nStart: ${seg.start}\nEnd: ${seg.end}`);
                         timelineContainer.appendChild(div);
                     });
                 }
