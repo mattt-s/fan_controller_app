@@ -38,7 +38,9 @@ ser = None # Serial object
 control_thread = None
 stop_thread = threading.Event()
 fan_history = deque() # Store (timestamp, state) tuples - state is boolean True/False
-state_lock = threading.Lock() # Lock for fan_state, fan_history, current_temp, last_error
+last_opened_time = None
+last_closed_time = None
+state_lock = threading.Lock() # Lock for fan_state, fan_history, current_temp, last_error, last_opened_time, last_closed_time
 settings_lock = threading.Lock() # Separate lock for settings dictionary R/W
 command_open_bytes = b'' # Derived from current_settings
 command_close_bytes = b'' # Derived from current_settings
@@ -343,7 +345,7 @@ def _get_state_at_time(timestamp, history_list, default_state):
 def fan_control_loop():
     """The main loop to check temperature and control the fan using current settings."""
     # Access globals needed in the loop
-    global fan_state, current_temp, fan_history, last_error
+    global fan_state, current_temp, fan_history, last_error, last_opened_time, last_closed_time
 
     write_log('info', "Fan control thread started.")
     if not init_serial(): # Initial connection attempt using loaded settings
@@ -375,6 +377,10 @@ def fan_control_loop():
         # We add an entry at `now`, the pruning logic below will handle keeping it within the window
         fan_history.append((now, initial_state))
         fan_state = initial_state
+        if initial_state:
+            last_opened_time = now
+        else:
+            last_closed_time = now
     set_fan(initial_state) # Attempt to set the physical fan state
 
     while not stop_thread.is_set():
@@ -439,6 +445,10 @@ def fan_control_loop():
             if set_fan(new_state): # If command sent successfully
                 with state_lock: # Update shared state under lock
                     fan_state = new_state
+                    if new_state:
+                        last_opened_time = now
+                    else:
+                        last_closed_time = now
                     # Add the state change event to history
                     fan_history.append((now, new_state))
                     # Pruning happens at the start of the loop based on max duration
@@ -621,6 +631,9 @@ def chart_data():
         current_temp_for_api = current_temp
         last_error_for_api = last_error
 
+        last_opened_for_api = last_opened_time.strftime('%Y-%m-%d %H:%M:%S') if last_opened_time else "N/A"
+        last_closed_for_api = last_closed_time.strftime('%Y-%m-%d %H:%M:%S') if last_closed_time else "N/A"
+
     # --- Determine the actual charting window start time ---
     # It's the later of: max_cutoff_time OR the timestamp of the earliest event in history_copy
     # If history_copy is empty, the effective start is 'now' (duration 0), or max_cutoff_time if we want to chart the full empty window
@@ -655,13 +668,19 @@ def chart_data():
             'total_on_seconds': 0,
             'total_off_seconds': 0,
             # 'history_segments': [], # Removed
-            'total_charted_seconds': 0 # Report 0 total seconds
+            'total_charted_seconds': 0, # Report 0 total seconds
+            'current_temp': current_temp_for_api,
+            'fan_state': "ON" if current_fan_state_for_calc else "OFF",
+            'last_error': last_error_for_api,
+            'last_opened_time': last_opened_for_api,
+            'last_closed_time': last_closed_for_api
         }
         return jsonify(chart_data)
 
-    # --- Calculate Pie Chart Data (Total ON/OFF time in the actual charting window) ---
+    # --- Calculate Pie Chart Data and Timeline Segments ---
     total_on_time = timedelta(0)
     total_off_time = timedelta(0)
+    segments = []
 
     # Determine the state active *at* the beginning of the charting window
     state_at_chart_window_start = _get_state_at_time(chart_window_start_time, history_copy_raw, current_fan_state_for_calc) # Use raw history for state lookup
@@ -681,6 +700,14 @@ def chart_data():
                     total_on_time += duration
                 else:
                     total_off_time += duration
+                    
+                percentage = (duration.total_seconds() / total_charted_seconds) * 100 if total_charted_seconds > 0 else 0
+                segments.append({
+                    'state': 'ON' if current_state_in_interval_for_pie else 'OFF',
+                    'start': current_interval_start_for_pie.strftime('%Y.%m.%d %H:%M:%S'),
+                    'end': interval_end_time.strftime('%Y.%m.%d %H:%M:%S'),
+                    'percentage': percentage
+                })
 
             # Start new interval
             current_interval_start_for_pie = interval_end_time
@@ -694,6 +721,14 @@ def chart_data():
             total_on_time += duration_last_interval_for_pie
         else:
             total_off_time += duration_last_interval_for_pie
+            
+        percentage = (duration_last_interval_for_pie.total_seconds() / total_charted_seconds) * 100 if total_charted_seconds > 0 else 0
+        segments.append({
+            'state': 'ON' if current_fan_state_for_calc else 'OFF',
+            'start': current_interval_start_for_pie.strftime('%Y.%m.%d %H:%M:%S'),
+            'end': now.strftime('%Y.%m.%d %H:%M:%S'),
+            'percentage': percentage
+        })
 
 
     on_percentage = (total_on_time.total_seconds() / total_charted_seconds) * 100
@@ -701,18 +736,20 @@ def chart_data():
 
 
     # --- Generate History Timeline Segments for Bar Chart ---
-    # SEGMENT GENERATION LOGIC REMOVED
+    # Handled collectively above.
 
     chart_data = {
         'on_percentage': round(on_percentage, 1),
         'off_percentage': round(off_percentage, 1),
         'total_on_seconds': round(total_on_time.total_seconds()),
         'total_off_seconds': round(total_off_time.total_seconds()),
-        # 'history_segments': segments, # Removed
+        'history_segments': segments,
         'total_charted_seconds': round(total_charted_seconds), # Add actual duration in seconds
         'current_temp': current_temp_for_api,
         'fan_state': "ON" if current_fan_state_for_calc else "OFF",
-        'last_error': last_error_for_api
+        'last_error': last_error_for_api,
+        'last_opened_time': last_opened_for_api,
+        'last_closed_time': last_closed_for_api
     }
     return jsonify(chart_data)
 

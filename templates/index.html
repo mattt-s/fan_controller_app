@@ -265,10 +265,10 @@
         </div>
         {% endif %}
 
-        <div class="row">
+        <div class="row mb-4">
             <!-- Settings Column -->
-            <div class="col-lg-8">
-                <div class="card mb-4">
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="card h-100">
                     <div class="card-header bg-white">
                         <i class="fas fa-sliders-h me-2"></i>Configuration
                     </div>
@@ -393,6 +393,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- History Timeline Bar -->
+        <div class="card mb-4 border-0 shadow-sm" style="border-radius: 12px; transform: none;">
+            <div class="card-header bg-white border-bottom-0 pb-0">
+                <i class="fas fa-history me-2"></i>History Timeline
+            </div>
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between text-muted small mb-1">
+                    <span id="timeline-start" class="font-monospace fw-bold">N/A</span>
+                    <span id="timeline-end" class="font-monospace fw-bold">N/A</span>
+                </div>
+                <!-- Interactive Segmented Container -->
+                <div id="timeline-container" class="d-flex w-100 rounded overflow-hidden"
+                    style="height: 30px; background-color: #e9ecef; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -501,6 +518,30 @@
             } else {
                 fanIcon.classList.remove('fan-on');
                 fanIcon.classList.add('fan-off');
+            }
+
+            // Update Timeline
+            const timelineContainer = document.getElementById('timeline-container');
+            if (timelineContainer && data.history_segments) {
+                // Check if lengths don't match or the container is empty, or just brute force rebuild
+                // To minimize DOM reflow every 2 seconds, only reconstruct if actual items changed in amount or if something's drastically different.
+                timelineContainer.innerHTML = '';
+
+                if (data.history_segments.length === 0) {
+                    timelineContainer.innerHTML = '<div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted small">No data recorded</div>';
+                } else {
+                    document.getElementById('timeline-start').innerText = data.history_segments[0].start;
+                    document.getElementById('timeline-end').innerText = data.history_segments[data.history_segments.length - 1].end;
+
+                    data.history_segments.forEach(seg => {
+                        const div = document.createElement('div');
+                        div.style.width = seg.percentage + '%';
+                        div.style.height = '100%';
+                        div.className = seg.state === 'ON' ? 'bg-success' : 'bg-danger';
+                        div.title = `${seg.start} - ${seg.end} (${seg.state})`;
+                        timelineContainer.appendChild(div);
+                    });
+                }
             }
         }
 
