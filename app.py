@@ -397,7 +397,7 @@ def fan_control_loop():
         # Always prune history based on the *maximum* configured duration
         cutoff_time = now - local_history_duration
         with state_lock: # Lock for history access
-            while fan_history and fan_history[0][0] < cutoff_time:
+            while len(fan_history) > 1 and fan_history[1][0] <= cutoff_time:
                 fan_history.popleft()
             # After pruning, ensure the earliest entry represents the state at or after cutoff_time
             # If history is now empty, the current state effectively covers the window.
@@ -416,7 +416,7 @@ def fan_control_loop():
             current_temp = temp if temp is not None else current_temp
             # Prune history based on the *maximum* duration AFTER getting current time
             cutoff_time = now - local_history_duration
-            while fan_history and fan_history[0][0] < cutoff_time:
+            while len(fan_history) > 1 and fan_history[1][0] <= cutoff_time:
                 fan_history.popleft()
 
 
@@ -456,12 +456,8 @@ def fan_control_loop():
                 write_log('error', "Failed to change fan state. State remains {}. Retrying next cycle.".format("ON" if current_fan_state else "OFF"))
                 # Don't update fan_state or history if set_fan failed
         else:
-            # If state is unchanged, add a history entry periodically to ensure graph
-            # covers the full duration up to 'now' accurately, even with no changes.
-            # Only add if the last history entry is significantly older than the interval.
-            with state_lock:
-                if not fan_history or (now - fan_history[-1][0]).total_seconds() > local_check_interval * 1.5: # Add point if last is old
-                    fan_history.append((now, fan_state))
+            # If state is unchanged, we do nothing.
+            # The chart calculation calculates the duration up to 'now' dynamically from the last state change.
             pass # Pruning is handled at the start of the loop
 
 
@@ -643,9 +639,9 @@ def chart_data():
 
     chart_window_start_time = max_cutoff_time # Default to max cutoff if no history within or before window
 
-    if history_copy:
+    if history_copy_raw:
         # Find the timestamp of the very first event we have after pruning/filtering
-        first_event_time = history_copy[0][0]
+        first_event_time = history_copy_raw[0][0]
         chart_window_start_time = max(max_cutoff_time, first_event_time)
     # else: If history_copy is empty, chart_window_start_time remains max_cutoff_time.
     # This means if history is empty, the chart will show the current state over the full max duration window.
