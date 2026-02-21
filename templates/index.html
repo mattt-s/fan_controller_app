@@ -197,6 +197,8 @@
             cursor: pointer;
             z-index: 1;
             position: relative;
+            min-width: 4px;
+            /* Ensure short segments are selectable */
         }
 
         .timeline-segment:hover {
@@ -461,7 +463,7 @@
                 </div>
                 <!-- Interactive Segmented Container -->
                 <div id="timeline-container" class="d-flex w-100 rounded"
-                    style="height: 30px; background-color: #e9ecef; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                    style="height: 30px; background-color: #e9ecef; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">
                 </div>
             </div>
         </div>
